@@ -108,7 +108,7 @@
             </div>
           </div>
 
-          <!-- ផ្នែកខាងស្តាំ៖ ព័ត៌មានលម្អិតរបស់សិស្ស -->
+          <!-- ផ្នែកខាងស្តាំ៖ ព័ត៌មានលម្អិតរបស់សិស្ស (កែសម្រួលស្ទីលទំនើប គ្មានផ្ទៃប្រផេះ) -->
           <div class="flex-grow w-full space-y-4 font-battambang">
             <h3 class="font-moul text-blue-800 text-lg border-b pb-2 flex items-center gap-2">
               <i class="fa-solid fa-id-card-clip"></i> ព័ត៌មានលម្អិតសិស្ស
@@ -175,7 +175,7 @@
       </div>
     </section>
 
-    <!-- 2. ផ្ទាំងផ្ទៀងផ្ទាត់លេខកូដ Admin (Username + Password) -->
+    <!-- 2. ផ្ទាំងផ្ទៀងផ្ទាត់លេខកូដ Admin (Username + Password + ភ្លេចលេខសម្ងាត់) -->
     <section id="section-admin-login" class="hidden max-w-md mx-auto my-12 bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-xl font-semibold text-center text-gray-800 mb-4"><i class="fa-solid fa-lock mr-2 text-amber-500"></i>ផ្ទៀងផ្ទាត់សិទ្ធិជា Admin</h2>
       <div class="space-y-4">
@@ -187,9 +187,17 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <input type="password" id="admin-password-input" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
+        
         <button id="btn-admin-login" class="w-full py-2 bg-amber-600 text-white rounded-md hover:bg-amber-500 transition font-medium">
           ចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង
         </button>
+
+        <!-- ប៊ូតុងភ្លេចលេខសម្ងាត់ (Forgot Password Button) -->
+        <div class="flex justify-end text-xs pt-1">
+          <button id="btn-forgot-password" class="text-blue-600 hover:text-blue-500 hover:underline transition font-semibold">
+            <i class="fa-solid fa-circle-question mr-1"></i> ភ្លេចលេខសម្ងាត់?
+          </button>
+        </div>
       </div>
     </section>
 
@@ -223,6 +231,12 @@
           <button id="btn-add-manual" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded transition">
             <i class="fa-solid fa-plus mr-1"></i> បញ្ចូលសិស្សដោយផ្ទាល់
           </button>
+
+          <!-- ប៊ូតុងលុបសិស្សទាំងអស់ ពណ៌ក្រហម -->
+          <button id="btn-delete-all-students" class="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-sm rounded transition font-semibold shadow">
+            <i class="fa-solid fa-trash-can mr-1"></i> លុបសិស្សទាំងអស់
+          </button>
+
           <button id="btn-admin-logout" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm rounded transition">
             ចាកចេញ
           </button>
@@ -297,7 +311,7 @@
               </div>
             </div>
 
-            <!-- ២. ជ្រើសរើសច្រើន & ការតម្រឹម -->
+            <!-- 二. ជ្រើសរើសច្រើន & ការតម្រឹម -->
             <div class="bg-gray-50 p-4 rounded border space-y-3">
               <label class="block text-xs font-bold text-gray-700"><i class="fa-solid fa-align-left mr-1"></i> ២. ជ្រើសរើសច្រើន & តម្រឹមឆ្វេង</label>
               <div class="flex items-center space-x-2">
@@ -578,6 +592,9 @@
     const btnCancelAccountChange = document.getElementById('btn-cancel-account-change');
     const btnSaveAccountChange = document.getElementById('btn-save-account-change');
 
+    // ប៊ូតុងលុបសិស្សទាំងអស់ ពណ៌ក្រហម
+    const btnDeleteAllStudents = document.getElementById('btn-delete-all-students');
+
     // Public Search
     const publicSearchInput = document.getElementById('public-search-input');
     const btnPublicSearch = document.getElementById('btn-public-search');
@@ -637,6 +654,60 @@
     // Tracking selected fields in Layout Designer
     let selectedFieldIds = [];
 
+    // បង្កើត IndexedDB Helper ដើម្បីរក្សាទុករូបភាពផ្ទៃក្រោយកម្រិតច្បាស់ខ្លាំង 1000 DPI (រារាំង QuotaExceededError)
+    const dbName = "StudentCardDB";
+    const storeName = "LayoutSettings";
+    const dbKey = "bgImage";
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = function(e) {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName);
+          }
+        };
+        request.onsuccess = function(e) {
+          resolve(e.target.result);
+        };
+        request.onerror = function(e) {
+          reject(e.target.error);
+        };
+      });
+    }
+
+    async function saveBgImageToDB(base64Data) {
+      try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction(storeName, "readwrite");
+          const store = transaction.objectStore(storeName);
+          const request = store.put(base64Data, dbKey);
+          request.onsuccess = () => resolve(true);
+          request.onerror = (e) => reject(e.target.error);
+        });
+      } catch (err) {
+        console.error("បដិសេធរក្សាទុកផ្ទៃក្រោយទៅកាន់ IndexedDB:", err);
+      }
+    }
+
+    async function getBgImageFromDB() {
+      try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction(storeName, "readonly");
+          const store = transaction.objectStore(storeName);
+          const request = store.get(dbKey);
+          request.onsuccess = (e) => resolve(e.target.result || "");
+          request.onerror = (e) => reject(e.target.error);
+        });
+      } catch (err) {
+        console.error("បដិសេធទាញយកផ្ទៃក្រោយពី IndexedDB:", err);
+        return "";
+      }
+    }
+
     // ២. បង្កើតរចនាសម្ព័ន្ធ Elements នៅក្នុងកាតសិស្ស
     function buildCardDOM(container, isDesignMode = false) {
       container.innerHTML = '';
@@ -683,7 +754,7 @@
     // អនុវត្តស្ទីល Background
     function applyBgStyles(container) {
       if (savedLayout.bgImage) {
-        container.style.backgroundImage = `url(${savedLayout.bgImage})`;
+        container.style.backgroundImage = `url("${savedLayout.bgImage}")`;
         container.style.backgroundSize = `${savedLayout.bgSizeWidth || 100}% ${savedLayout.bgSizeHeight || 100}%`;
         container.style.backgroundPosition = `${savedLayout.bgPositionX || 0}px ${savedLayout.bgPositionY || 0}px`;
       } else {
@@ -1041,24 +1112,55 @@
       localStorage.setItem('admin_username', newUser);
       localStorage.setItem('admin_password', newPass);
 
-      // បង្កើត Mailto Link ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់ Gmail របស់គាត់
-      const subject = encodeURIComponent("ការបញ្ជាក់ពីការផ្លាស់ប្តូរគណនី Admin ប្រព័ន្ធសាលារៀន");
+      // បង្កើត Subject និង Body សម្រាប់សារបញ្ជាក់
+      const subject = encodeURIComponent("ការបញ្ជាក់ពីការផ្លាស់ប្តូរគណនី Admin - ប្រព័ន្ធសាលារៀន");
       const body = encodeURIComponent(
-        `សួស្តី! \n\nព័ត៌មានគណនី Admin របស់អ្នកត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យដូចខាងក្រោម៖\n\n` +
+        `គណនី Admin របស់អ្នកត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យដូចខាងក្រោម៖\n\n` +
         `- Username ថ្មី៖ ${newUser}\n` +
         `- Password ថ្មី៖ ${newPass}\n\n` +
         `សូមរក្សាព័ត៌មាននេះជាសម្ងាត់បំផុត!`
       );
 
-      const mailtoUrl = `mailto:${gmailAddr}?subject=${subject}&body=${body}`;
+      // ប្រើប្រាស់ Gmail web compose link ដែលលឿន និងទាញទៅផ្ទាំងសរសេរសារក្នុង Gmail ផ្ទាល់
+      const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${gmailAddr}&su=${subject}&body=${body}`;
 
-      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីដោយជោគជ័យ! ប្រព័ន្ធនឹងបើកកម្មវិធី Email របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់ Gmail របស់អ្នក។');
+      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីរួចរាល់! ប្រព័ន្ធនឹងបើកផ្ទាំង Gmail ក្នុង Browser របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់គណនី Gmail របស់អ្នក។');
       
-      // បើក Mailto link
-      window.open(mailtoUrl, '_blank');
+      // បើក Gmail Compose Window
+      window.open(gmailComposeUrl, '_blank');
 
       // លាក់ផ្ទាំង
       adminAccountSection.classList.add('hidden');
+    });
+
+    // ភ្លេចលេខសម្ងាត់ (Forgot Password)
+    const btnForgotPassword = document.getElementById('btn-forgot-password');
+    btnForgotPassword.addEventListener('click', () => {
+      const currentRecoveryGmail = localStorage.getItem('confirm_admin_gmail');
+      
+      if (!currentRecoveryGmail) {
+        alert('គណនីរបស់អ្នកមិនទាន់បានកំណត់ Gmail សម្រាប់សង្គ្រោះឡើយ! សូមចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង (Admin) រួចកំណត់ប្រអប់សំបុត្រ Gmail ជាមុនសិន។\n\nគណនីលំនាំដើមគឺ៖ SengVa / @9999');
+        return;
+      }
+
+      const enteredGmail = prompt('សូមបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកដែលបានកំណត់សម្រាប់សង្គ្រោះ៖');
+      if (enteredGmail === null) return;
+
+      if (enteredGmail.trim().toLowerCase() === currentRecoveryGmail.trim().toLowerCase()) {
+        const subject = encodeURIComponent("ការសង្គ្រោះគណនី Admin - ប្រព័ន្ធសាលារៀន");
+        const body = encodeURIComponent(
+          `ព័ត៌មានគណនី Admin របស់អ្នក៖\n\n` +
+          `- Username៖ ${adminUsername}\n` +
+          `- Password៖ ${adminPassword}\n\n` +
+          `សូមរក្សាព័ត៌មាននេះជាសម្ងាត់បំផុត!`
+        );
+        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${currentRecoveryGmail}&su=${subject}&body=${body}`;
+
+        alert(`ផ្ទៀងផ្ទាត់ជោគជ័យ! ប្រព័ន្ធនឹងបង្ហាញលេខសម្ងាត់ និងបើកផ្ទាំង Gmail របស់អ្នក៖\n\nUsername៖ ${adminUsername}\nPassword៖ ${adminPassword}`);
+        window.open(gmailComposeUrl, '_blank');
+      } else {
+        alert('អាសយដ្ឋាន Gmail មិនត្រឹមត្រូវ ឬមិនត្រូវគ្នានឹងគណនីដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ!');
+      }
     });
 
     // ១០. រក្សាទុកប្លង់កាតសិស្ស និងបិទផ្ទាំង Designer
@@ -1073,8 +1175,11 @@
         }
       });
 
-      // រក្សាទុកក្នុង LocalStorage
-      localStorage.setItem('card_layout', JSON.stringify(savedLayout));
+      // បំបែក bgImage ចេញពី savedLayout មុនពេលរក្សាទុកក្នុង LocalStorage ដើម្បីកុំឱ្យលើសចំណុះ (LocalStorage quota exceed)
+      const layoutToSave = JSON.parse(JSON.stringify(savedLayout));
+      layoutToSave.bgImage = ""; // កុំរក្សាទុក Base64 ធំក្នុង LocalStorage
+
+      localStorage.setItem('card_layout', JSON.stringify(layoutToSave));
       
       alert('បានរក្សាទុកប្លង់កាតសិស្សរួចរាល់!');
       
@@ -1082,10 +1187,14 @@
       designerContainerSection.classList.add('hidden');
     });
 
-    btnResetLayout.addEventListener('click', () => {
+    btnResetLayout.addEventListener('click', async () => {
       if (confirm('តើអ្នកពិតជាចង់កំណត់ប្លង់ឡើងវិញមែនទេ?')) {
         savedLayout = JSON.parse(JSON.stringify(defaultLayout));
         localStorage.removeItem('card_layout');
+        
+        // លុបរូបភាពផ្ទៃក្រោយចេញពី IndexedDB ផងដែរ
+        await saveBgImageToDB("");
+
         buildCardDOM(designerCardRender, true);
         displayCardData('designer-card-render', students[0] || initialStudents[0]);
         syncBgSlidersToUI();
@@ -1294,6 +1403,26 @@
         renderAdminTable(adminSearchInput.value);
       }
     }
+
+    // មុខងារលុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធ
+    btnDeleteAllStudents.addEventListener('click', () => {
+      if (students.length === 0) {
+        alert('មិនមានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធសម្រាប់លុបឡើយ!');
+        return;
+      }
+
+      if (confirm('តើអ្នកពិតជាចង់លុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយវិញបានឡើយ!')) {
+        const doubleCheck = prompt('សូមវាយពាក្យ "DELETE" ដើម្បីបញ្ជាក់ការលុបទិន្នន័យទាំងអស់៖');
+        if (doubleCheck === 'DELETE' || doubleCheck === 'delete') {
+          students = [];
+          localStorage.setItem('students', JSON.stringify(students));
+          renderAdminTable();
+          alert('បានលុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធដោយជោគជ័យ!');
+        } else {
+          alert('ការលុបត្រូវបានបោះបង់ ដោយសារការវាយពាក្យបញ្ជាក់មិនត្រឹមត្រូវ!');
+        }
+      }
+    });
 
     window.openCardDownloadModal = function(id) {
       const student = students.find(s => s.id === id);
@@ -1619,6 +1748,42 @@
       link.click();
       document.body.removeChild(link);
     });
+
+    // ៥. មុខងារ Upload រូបភាពផ្ទៃក្រោយកាត (JPG)
+    layoutBgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // បន្ថែមការត្រួតពិនិត្យទំហំកុំឱ្យលើស 15MB ការពារបញ្ហា IndexedDB
+        if (file.size > 15 * 1024 * 1024) {
+          alert("រូបភាពផ្ទៃក្រោយធំពេកហើយ! សូមជ្រើសរើសរូបភាពដែលមានទំហំតូចជាង 15MB។");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+          savedLayout.bgImage = event.target.result; // Base64 កម្រិតច្បាស់ដើម
+          
+          // រក្សាទុកកម្រិតច្បាស់អតិបរមា 1000dpi ទៅកាន់ IndexedDB ជៀសវាងបញ្ហា Quota LocalStorage
+          await saveBgImageToDB(event.target.result);
+
+          applyBgStyles(designerCardRender); 
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // កំណត់ទិន្នន័យដំបូងពេលបើកទំព័រ
+    async function initPage() {
+      try {
+        const dbBg = await getBgImageFromDB();
+        savedLayout.bgImage = dbBg || defaultLayout.bgImage;
+      } catch (err) {
+        console.error("Error loading background image:", err);
+      }
+      renderAdminTable();
+    }
+
+    // ហៅដំណើរការកូដផ្ដើម
+    initPage();
   </script>
 </body>
 </html>
