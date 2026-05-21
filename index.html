@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធស្រង់ព័ត៌មានបុគ្គលិក</title>
+    <!-- ទាញយក Tailwind CSS សម្រាប់រចនាបថ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ទាញយក Font ខ្មែរ Kantumruy Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- របារខាងលើកំណត់ឱ្យជាប់នៅផ្នែកខាងលើ (Sticky) និងមានកម្ពស់ថេរ ដើម្បីកុំឱ្យរំកិលឡើងចុះ -->
+    <nav class="bg-blue-800 text-white shadow-lg sticky top-0 z-50 h-16 flex items-center">
+        <div class="max-w-6xl mx-auto px-4 w-full flex justify-between items-center">
+            
+            <!-- ផ្នែកខាងឆ្វេង៖ ចំណងជើង និងរបារស្វែងរកទាំងពីរ -->
+            <div class="flex items-center space-x-4 flex-1 mr-4 min-w-0">
+                <h1 class="text-sm md:text-xl font-bold tracking-wide shrink-0">ប្រព័ន្ធស្រង់ព័ត៌មានបុគ្គលិក</h1>
+                
+                <!-- របារស្វែងរកសម្រាប់កែប្រែទិន្នន័យបុគ្គលិក (បង្ហាញតែលើ Form Tab) [1] -->
+                <div id="top-edit-search-wrapper" class="hidden sm:flex gap-2 w-full max-w-[200px] md:max-w-xs">
+                    <input type="text" id="search-edit-id" placeholder="អត្តលេខដើម្បីកែសម្រួល..." class="w-full border border-blue-700 bg-blue-900 text-white placeholder-blue-300 rounded px-3 py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button type="button" onclick="findEmployeeToEdit()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs md:text-sm font-semibold transition shrink-0">កែប្រែ</button>
+                </div>
+
+                <!-- របារស្វែងរកទិន្នន័យរួមសម្រាប់ Admin (បង្ហាញតែលើ Admin Tab) -->
+                <div id="top-search-wrapper" class="hidden w-full max-w-[200px] md:max-w-xs">
+                    <input type="text" id="search-input" oninput="searchEmployee()" placeholder="ស្វែងរកតាមឈ្មោះ ឬអត្តលេខ..." class="w-full border border-blue-700 bg-blue-900 text-white placeholder-blue-300 rounded px-3 py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+            </div>
+
+            <!-- ផ្នែកខាងស្តាំ៖ ប៊ូតុងប្តូរទំព័រ -->
+            <div class="space-x-2 shrink-0">
+                <button onclick="switchTab('form-tab')" id="btn-form" class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded bg-blue-900 font-medium">បំពេញព័ត៌មាន</button>
+                <button onclick="switchTab('admin-tab')" id="btn-admin" class="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded hover:bg-blue-700 font-medium">ផ្ទាំង Admin</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- ផ្នែកទី ១៖ ទម្រង់បំពេញព័ត៌មានសម្រាប់បុគ្គលិក -->
+        <div id="form-tab" class="tab-content block">
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+                
+                <!-- ប្រអប់ស្វែងរកចាស់ត្រូវបានលុបចេញពីទីនេះ ដើម្បីកុំឱ្យជាន់គ្នា [1] -->
+
+                <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3 text-center">សូមបំពេញព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក</h2>
+                
+                <!-- សារជូនដំណឹងជោគជ័យ -->
+                <div id="success-alert" class="hidden mb-4 p-4 bg-green-100 text-green-800 rounded border border-green-200">
+                    ព័ត៌មានត្រូវបានរក្សាទុកដោយជោគជ័យ!
+                </div>
+
+                <form id="employee-form" onsubmit="saveEmployeeData(event)" class="space-y-4">
+                    
+                    <!-- កន្លែងបញ្ចូលរូបថតបុគ្គលិក -->
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="relative w-28 h-28 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden" id="photo-container">
+                            <img id="photo-preview" class="hidden w-full h-full object-cover">
+                            <div id="photo-placeholder" class="text-center p-2 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="text-xs">រូបថត</span>
+                            </div>
+                        </div>
+                        <input type="file" id="emp-photo" accept="image/*" class="hidden" onchange="handlePhotoUpload(this)">
+                        <button type="button" onclick="document.getElementById('emp-photo').click()" class="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium focus:outline-none">
+                            ជ្រើសរើសរូបថត
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">អត្តលេខបុគ្គលិក <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-id" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">ឈ្មោះពេញ <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-name" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">ភេទ <span class="text-red-500">*</span></label>
+                            <select id="emp-gender" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- ជ្រើសរើស --</option>
+                                <option value="ប្រុស">ប្រុស</option>
+                                <option value="ស្រី">ស្រី</option>
+                                <option value="ផ្សេងៗ">ផ្សេងៗ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">តួនាទីបច្ចុប្បន្ន <span class="text-red-500">*</span></label>
+                            <select id="emp-position" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- ជ្រើសរើសតួនាទី --</option>
+                                <option value="នាយក">នាយក</option>
+                                <option value="នាយិកា">នាយិកា</option>
+                                <option value="នាយករង">នាយករង</option>
+                                <option value="នាយិការង">នាយិការង</option>
+                                <option value="លេខាធិការ">លេខាធិការ</option>
+                                <option value="ហិរញ្ញិក">ហិរញ្ញិក</option>
+                                <option value="បណ្ណារក្ស">បណ្ណារក្ស</option>
+                                <option value="ទីចាត់ការ">ទីចាត់ការ</option>
+                                <option value="គ្រូបង្រៀន">គ្រូបង្រៀន</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">លេខទូរស័ព្ទ <span class="text-red-500">*</span></label>
+                            <input type="tel" id="emp-phone" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">លេខទំនាក់ទំនងបន្ទាន់ <span class="text-red-500">*</span></label>
+                            <input type="tel" id="emp-emergency" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ឈ្មោះ និងលេខទូរស័ព្ទ">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">អាសយដ្ឋានបច្ចុប្បន្ន <span class="text-red-500">*</span></label>
+                        <textarea id="emp-address" rows="3" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-end gap-2 pt-2">
+                        <!-- ប៊ូតុងបោះបង់ (នឹងបង្ហាញតែពេលកំពុង Edit ប៉ុណ្ណោះ) -->
+                        <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-6 rounded transition duration-200">
+                            បោះបង់ការកែសម្រួល
+                        </button>
+                        <button type="submit" id="btn-submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded transition duration-200">
+                            រក្សាទុកព័ត៌មាន
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ផ្នែកទី ២៖ ផ្ទាំងគ្រប់គ្រងសម្រាប់ Admin ( Dashboard ) -->
+        <div id="admin-tab" class="tab-content hidden">
+            <!-- ផ្ទាំងផ្ទៀងផ្ទាត់កូដសម្ងាត់មុននឹងចូលមើល -->
+            <div id="admin-login-box" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">សូមបញ្ចូលលេខកូដសម្ងាត់ Admin</h3>
+                <input type="password" id="admin-password" class="w-full border border-gray-300 rounded p-2 mb-4 text-center focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="បញ្ចូលលេខកូដនៅទីនេះ">
+                <button onclick="verifyAdminPassword()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 w-full">ផ្ទៀងផ្ទាត់</button>
+                <p class="text-xs text-gray-500 mt-2">កំណត់សម្គាល់៖ លេខកូដលំនាំដើមគឺ "admin"</p>
+            </div>
+
+            <!-- ផ្ទាំងទិន្នន័យ (នឹងបង្ហាញពេលវាយកូដត្រូវ) -->
+            <div id="admin-data-box" class="hidden bg-white p-6 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800">បញ្ជីព័ត៌មានបុគ្គលិកដែលបានស្រង់</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded text-sm transition shrink-0 ml-auto">
+                            ទាញយកជា Excel (CSV)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- តារាងបង្ហាញទិន្នន័យ -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 border-b text-left text-gray-700 text-sm font-semibold">
+                                <th class="py-3 px-4 border-r">រូបថត</th>
+                                <th class="py-3 px-4 border-r">អត្តលេខ</th>
+                                <th class="py-3 px-4 border-r">ឈ្មោះពេញ</th>
+                                <th class="py-3 px-4 border-r">ភេទ</th>
+                                <th class="py-3 px-4 border-r">តួនាទី</th>
+                                <th class="py-3 px-4 border-r">លេខទូរស័ព្ទ</th>
+                                <th class="py-3 px-4 border-r">ទំនាក់ទំនងបន្ទាន់</th>
+                                <th class="py-3 px-4 border-r">អាសយដ្ឋាន</th>
+                                <th class="py-3 px-4 text-center">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-table-body" class="text-sm text-gray-600">
+                            <!-- ទិន្នន័យនឹងបង្ហាញនៅទីនេះដោយស្វ័យប្រវត្តិពី JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ប្រព័ន្ធគ្រប់គ្រង JavaScript នៃកម្មវិធី -->
+    <script>
+        // អានទិន្នន័យពី LocalStorage ប្រសិនបើមាន ឬបង្កើតជា Array ទទេ
+        let employees = JSON.parse(localStorage.getItem('employees')) || [];
+        let isAdminLoggedIn = false;
+        let currentPhotoBase64 = ""; // រក្សាទុករូបថតបណ្តោះអាសន្ន
+
+        // មុខងារសម្រាប់គ្រប់គ្រងដំណើរការកែសម្រួល (Edit mode state)
+        let isEditMode = false;
+        let editEmpId = "";
+
+        // មុខងារប្តូរ Tab បំពេញព័ត៌មាន និង Admin
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            if (tabId === 'form-tab') {
+                document.getElementById('btn-form').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded bg-blue-900 font-medium";
+                document.getElementById('btn-admin').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded hover:bg-blue-700 font-medium";
+                
+                // បង្ហាញរបារស្វែងរកកែប្រែ និងលាក់របារស្វែងរក Admin [1]
+                document.getElementById('top-edit-search-wrapper').classList.remove('hidden');
+                document.getElementById('top-search-wrapper').classList.add('hidden');
+            } else {
+                document.getElementById('btn-admin').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded bg-blue-900 font-medium";
+                document.getElementById('btn-form').className = "px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm rounded hover:bg-blue-700 font-medium";
+                
+                // លាក់របារស្វែងរកកែប្រែជានិច្ចពេលនៅផ្ទាំង Admin [1]
+                document.getElementById('top-edit-search-wrapper').classList.add('hidden');
+
+                if (isAdminLoggedIn) {
+                    showAdminData();
+                } else {
+                    document.getElementById('admin-login-box').classList.remove('hidden');
+                    document.getElementById('admin-data-box').classList.add('hidden');
+                    document.getElementById('top-search-wrapper').classList.add('hidden'); // លាក់របារស្វែងរកបើមិនទាន់ Login
+                }
+            }
+        }
+
+        // មុខងារស្វែងរកបុគ្គលិកចាស់ដើម្បីយកមកកែសម្រួល
+        function findEmployeeToEdit() {
+            const searchId = document.getElementById('search-edit-id').value.trim();
+            if (!searchId) {
+                alert("សូមបញ្ចូលអត្តលេខបុគ្គលិកដើម្បីស្វែងរក!");
+                return;
+            }
+
+            const emp = employees.find(e => e.id === searchId);
+
+            if (emp) {
+                isEditMode = true;
+                editEmpId = emp.id;
+
+                document.getElementById('form-title').innerText = "កែសម្រួលព័ត៌មានផ្ទាល់ខ្លួន";
+                document.getElementById('btn-submit').innerText = "ធ្វើបច្ចុប្បន្នភាពព័ត៌មាន";
+                document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+                document.getElementById('emp-id').value = emp.id;
+                document.getElementById('emp-id').readOnly = true;
+                document.getElementById('emp-id').classList.add('bg-gray-100');
+                document.getElementById('emp-name').value = emp.name;
+                document.getElementById('emp-gender').value = emp.gender;
+                document.getElementById('emp-position').value = emp.position;
+                document.getElementById('emp-phone').value = emp.phone;
+                document.getElementById('emp-emergency').value = emp.emergency;
+                document.getElementById('emp-address').value = emp.address;
+
+                if (emp.photo) {
+                    currentPhotoBase64 = emp.photo;
+                    const preview = document.getElementById('photo-preview');
+                    const placeholder = document.getElementById('photo-placeholder');
+                    preview.src = emp.photo;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                } else {
+                    currentPhotoBase64 = "";
+                    document.getElementById('photo-preview').classList.add('hidden');
+                    document.getElementById('photo-preview').src = "";
+                    document.getElementById('photo-placeholder').classList.remove('hidden');
+                }
+
+                document.getElementById('search-edit-id').value = "";
+                alert("ស្វែងរកឃើញព័ត៌មានរបស់លោកអ្នក! លោកអ្នកអាចកែសម្រួលព័ត៌មានក្នុងទម្រង់ខាងក្រោមរួចចុចរក្សាទុក។");
+            } else {
+                alert("រកមិនឃើញព័ត៌មានដែលមានអត្តលេខ " + searchId + " នេះទេ!");
+            }
+        }
+
+        // មុខងារបោះបង់ការកែសម្រួល
+        function cancelEdit() {
+            isEditMode = false;
+            editEmpId = "";
+
+            document.getElementById('form-title').innerText = "សូមបំពេញព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក";
+            document.getElementById('btn-submit').innerText = "រក្សាទុកព័ត៌មាន";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+
+            document.getElementById('emp-id').readOnly = false;
+            document.getElementById('emp-id').classList.remove('bg-gray-100');
+
+            resetForm();
+        }
+
+        // មុខងារចាត់ចែងនៅពេលបុគ្គលិកជ្រើសរើសរូបថត
+        function handlePhotoUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const max_size = 120;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    const preview = document.getElementById('photo-preview');
+                    const placeholder = document.getElementById('photo-placeholder');
+                    preview.src = currentPhotoBase64;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // មុខងារផ្ទៀងផ្ទាត់លេខកូដ Admin
+        function verifyAdminPassword() {
+            const pass = document.getElementById('admin-password').value;
+            if (pass === "admin") {
+                isAdminLoggedIn = true;
+                showAdminData();
+            } else {
+                alert("លេខកូដសម្ងាត់មិនត្រឹមត្រូវទេ! (កូដលំនាំដើមគឺ: admin)");
+            }
+            document.getElementById('admin-password').value = "";
+        }
+
+        // បង្ហាញតារាងទិន្នន័យ Admin
+        function showAdminData() {
+            document.getElementById('admin-login-box').classList.add('hidden');
+            document.getElementById('admin-data-box').classList.remove('hidden');
+            
+            // នៅពេល Admin ចូលគណនីជោគជ័យ៖ លាក់របារកែប្រែ រួចបង្ហាញរបារស្វែងរក Admin [1]
+            document.getElementById('top-search-wrapper').classList.remove('hidden');
+            document.getElementById('top-edit-search-wrapper').classList.add('hidden');
+            
+            renderTable(employees);
+        }
+
+        // មុខងាររក្សាទុកទិន្នន័យ (ទាំងបញ្ចូលថ្មី និងកែសម្រួល)
+        function saveEmployeeData(event) {
+            event.preventDefault();
+
+            const empData = {
+                id: document.getElementById('emp-id').value.trim(),
+                name: document.getElementById('emp-name').value.trim(),
+                gender: document.getElementById('emp-gender').value,
+                position: document.getElementById('emp-position').value,
+                phone: document.getElementById('emp-phone').value.trim(),
+                emergency: document.getElementById('emp-emergency').value.trim(),
+                address: document.getElementById('emp-address').value.trim(),
+                photo: currentPhotoBase64
+            };
+
+            if (isEditMode) {
+                const index = employees.findIndex(e => e.id === editEmpId);
+                if (index !== -1) {
+                    employees[index] = empData;
+                    localStorage.setItem('employees', JSON.stringify(employees));
+                    
+                    document.getElementById('success-alert').innerText = "ព័ត៌មានត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ!";
+                    document.getElementById('success-alert').classList.remove('hidden');
+                    
+                    cancelEdit();
+                }
+            } else {
+                const isDuplicate = employees.some(emp => emp.id === empData.id);
+                if (isDuplicate) {
+                    alert("អត្តលេខបុគ្គលិកនេះមានរួចហើយ! សូមពិនិត្យឡើងវិញ។");
+                    return;
+                }
+
+                employees.push(empData);
+                localStorage.setItem('employees', JSON.stringify(employees));
+
+                document.getElementById('success-alert').innerText = "ព័ត៌មានត្រូវបានរក្សាទុកដោយជោគជ័យ!";
+                document.getElementById('success-alert').classList.remove('hidden');
+                resetForm();
+            }
+
+            setTimeout(() => {
+                document.getElementById('success-alert').classList.add('hidden');
+            }, 5000);
+        }
+
+        // មុខងារសម្អាតទម្រង់ Form ឡើងវិញ
+        function resetForm() {
+            document.getElementById('employee-form').reset();
+            currentPhotoBase64 = "";
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('photo-preview').src = "";
+            document.getElementById('photo-placeholder').classList.remove('hidden');
+            document.getElementById('search-edit-id').value = ""; // សម្អាតចន្លោះស្វែងរកនៅលើ Navbar [1]
+        }
+
+        // មុខងារបង្ហាញទិន្នន័យចូលក្នុងតារាង HTML
+        function renderTable(dataList) {
+            const tableBody = document.getElementById('employee-table-body');
+            tableBody.innerHTML = "";
+
+            if (dataList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-gray-500">មិនទាន់មានព័ត៌មាននៅឡើយទេ។</td></tr>`;
+                return;
+            }
+
+            dataList.forEach(emp => {
+                const photoImg = emp.photo 
+                    ? `<img src="${emp.photo}" class="w-10 h-10 rounded-full object-cover mx-auto border border-gray-300">`
+                    : `<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mx-auto text-gray-400 font-bold text-xs">${escapeHtml(emp.name.charAt(0))}</div>`;
+
+                const row = document.createElement('tr');
+                row.className = "border-b hover:bg-gray-50 transition";
+                row.innerHTML = `
+                    <td class="py-2 px-4 border-r text-center">${photoImg}</td>
+                    <td class="py-3 px-4 border-r font-medium text-gray-800">${escapeHtml(emp.id)}</td>
+                    <td class="py-3 px-4 border-r">${escapeHtml(emp.name)}</td>
+                    <td class="py-3 px-4 border-r">${escapeHtml(emp.gender)}</td>
+                    <td class="py-3 px-4 border-r">${escapeHtml(emp.position)}</td>
+                    <td class="py-3 px-4 border-r">${escapeHtml(emp.phone)}</td>
+                    <td class="py-3 px-4 border-r">${escapeHtml(emp.emergency)}</td>
+                    <td class="py-3 px-4 border-r text-xs">${escapeHtml(emp.address)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="deleteEmployee('${emp.id}')" class="bg-red-100 text-red-600 hover:bg-red-200 py-1 px-3 rounded text-xs font-semibold transition">
+                            លុប
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // មុខងារស្វែងរកបុគ្គលិកនៅក្នុងផ្ទាំង Admin (ទាញទិន្នន័យពីរបារស្វែងរកថ្មីនៅផ្នែកខាងលើ)
+        function searchEmployee() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = employees.filter(emp => 
+                emp.id.toLowerCase().includes(query) || 
+                emp.name.toLowerCase().includes(query) || 
+                emp.position.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        // មុខងារលុបទិន្នន័យបុគ្គលិក
+        function deleteEmployee(id) {
+            if (confirm("តើអ្នកពិតជាចង់លុបព័ត៌មានរបស់បុគ្គលិកអត្តលេខ " + id + " នេះមែនទេ?")) {
+                employees = employees.filter(emp => emp.id !== id);
+                localStorage.setItem('employees', JSON.stringify(employees));
+                renderTable(employees);
+            }
+        }
+
+        // មុខងារទាញយកទិន្នន័យជា CSV (Excel)
+        function exportToCSV() {
+            if (employees.length === 0) {
+                alert("គ្មានទិន្នន័យសម្រាប់ទាញយកទេ!");
+                return;
+            }
+
+            let csvContent = "អត្តលេខ,ឈ្មោះពេញ,ភេទ,តួនាទី,លេខទូរស័ព្ទ,ទំនាក់ទំនងបន្ទាន់,អាសយដ្ឋាន,រូបថត\n";
+
+            employees.forEach(emp => {
+                const id = `"${emp.id.replace(/"/g, '""')}"`;
+                const name = `"${emp.name.replace(/"/g, '""')}"`;
+                const gender = `"${emp.gender.replace(/"/g, '""')}"`;
+                const position = `"${emp.position.replace(/"/g, '""')}"`;
+                const phone = `"${emp.phone.replace(/"/g, '""')}"`;
+                const emergency = `"${emp.emergency.replace(/"/g, '""')}"`;
+                const address = `"${emp.address.replace(/"/g, '""')}"`;
+                const hasPhoto = emp.photo ? '"មានរូបថត"' : '"គ្មានរូបថត"';
+
+                csvContent += `${id},${name},${gender},${position},${phone},${emergency},${address},${hasPhoto}\n`;
+            });
+
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", "employee_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // មុខងារការពារការបញ្ចូលកូដព្យាបាទ (HTML Injection)
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
