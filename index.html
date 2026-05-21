@@ -243,6 +243,38 @@
         </div>
       </div>
 
+      <!-- ផ្នែកភ្ជាប់ទំនាក់ទំនង Google Drive និងការសមកាលកម្ម -->
+      <div id="drive-sync-section" class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b">
+          <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-cloud-arrow-up mr-2 text-green-600"></i>ភ្ជាប់ទំនាក់ទំនងជាមួយ Google Drive</h3>
+        </div>
+        <p class="text-xs text-gray-500 leading-relaxed">
+          ដើម្បីរក្សាទុកទិន្នន័យដោយស្វ័យប្រវត្តទៅកាន់ Google Drive Folder របស់អ្នក (<a href="https://drive.google.com/drive/folders/11V1H69Bz7lSHaTHppKPnMlep_9601TKG?usp=sharing" target="_blank" class="text-blue-600 underline font-semibold">11V1H69Bz7lSHaTHppKPnMlep_9601TKG</a>) សូមបង្កើត **Google Apps Script Web App** រួចចម្លងតំណភ្ជាប់ URL មកដាក់ក្នុងប្រអប់ខាងក្រោម៖
+        </p>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Google Apps Script Web App URL</label>
+            <div class="flex gap-2">
+              <input type="text" id="input-drive-script-url" placeholder="បញ្ចូល Web App URL ឧ. https://script.google.com/macros/s/.../exec" class="flex-grow px-3 py-1.5 border rounded text-xs">
+              <button id="btn-save-sync-url" class="px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded text-xs font-semibold transition">
+                រក្សាទុក URL
+              </button>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-2 pt-2 border-t">
+            <button id="btn-sync-to-drive" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition font-semibold">
+              <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> បញ្ជូនទិន្នន័យទៅ Drive ភ្លាមៗ (Sync to Drive)
+            </button>
+            <button id="btn-sync-from-drive" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs rounded transition font-semibold">
+              <i class="fa-solid fa-arrow-down-to-bracket mr-1"></i> ទាញទិន្នន័យពី Drive ភ្លាមៗ (Sync from Drive)
+            </button>
+            <span id="sync-status" class="text-xs text-gray-400 self-center font-semibold italic ml-2"></span>
+          </div>
+        </div>
+      </div>
+
       <!-- ផ្នែកកែសម្រួល ឬផ្លាស់ប្តូរគណនី Admin (Change Account Settings) -->
       <div id="admin-account-section" class="hidden bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-600 space-y-4">
         <div class="flex justify-between items-center pb-2 border-b">
@@ -311,9 +343,9 @@
               </div>
             </div>
 
-            <!-- 二. ជ្រើសរើសច្រើន & ការតម្រឹម -->
+            <!-- ២. ជ្រើសរើសច្រើន & ការតម្រឹម -->
             <div class="bg-gray-50 p-4 rounded border space-y-3">
-              <label class="block text-xs font-bold text-gray-700"><i class="fa-solid fa-align-left mr-1"></i> ២. ជ្រើសរើសច្រើន & តម្រឹមឆ្វេង</label>
+              <label class="block text-xs font-bold text-gray-700"><i class="fa-solid fa-align-left mr-1"></i> ២. ជ្រើសរើសច្រើន & ការតម្រឹមឆ្វេង</label>
               <div class="flex items-center space-x-2">
                 <input type="checkbox" id="chk-multi-select" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                 <label for="chk-multi-select" class="text-xs text-gray-700 font-semibold cursor-pointer">របៀបជ្រើសរើសច្រើន (Multi-Select Mode)</label>
@@ -1401,6 +1433,7 @@
         students = students.filter(s => s.id !== id);
         localStorage.setItem('students', JSON.stringify(students));
         renderAdminTable(adminSearchInput.value);
+        autoSyncToDrive(); // Sync automatically
       }
     }
 
@@ -1418,6 +1451,7 @@
           localStorage.setItem('students', JSON.stringify(students));
           renderAdminTable();
           alert('បានលុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធដោយជោគជ័យ!');
+          autoSyncToDrive(); // Sync automatically
         } else {
           alert('ការលុបត្រូវបានបោះបង់ ដោយសារការវាយពាក្យបញ្ជាក់មិនត្រឹមត្រូវ!');
         }
@@ -1663,6 +1697,7 @@
       
       resetStudentForm();
       renderAdminTable(adminSearchInput.value);
+      autoSyncToDrive(); // Sync automatically
     }
 
     const csvFileInput = document.getElementById('csv-file-input');
@@ -1724,6 +1759,7 @@
           renderAdminTable();
           alert(`នាំចូលជោគជ័យ៖ បានបញ្ចូលសិស្សថ្មីចំនួន ${importedCount} នាក់ (រំលងអត្តលេខស្ទួនចំនួន ${skipCount} នាក់)`);
           csvFileInput.value = '';
+          autoSyncToDrive(); // Sync automatically
         },
         error: function(err) {
           alert('ការអានឯកសារ CSV មានកំហុស៖ ' + err.message);
@@ -1771,15 +1807,166 @@
       }
     });
 
+    // --- Google Drive Sync Logic ---
+    const inputDriveScriptUrl = document.getElementById('input-drive-script-url');
+    const btnSaveSyncUrl = document.getElementById('btn-save-sync-url');
+    const btnSyncToDrive = document.getElementById('btn-sync-to-drive');
+    const btnSyncFromDrive = document.getElementById('btn-sync-from-drive');
+    const syncStatus = document.getElementById('sync-status');
+
+    // ផ្ទុកតំណភ្ជាប់ URL ចាស់ពី LocalStorage ប្រសិនបើមាន
+    const savedSyncUrl = localStorage.getItem('drive_script_url');
+    if (savedSyncUrl) {
+      inputDriveScriptUrl.value = savedSyncUrl;
+    }
+
+    btnSaveSyncUrl.addEventListener('click', () => {
+      const url = inputDriveScriptUrl.value.trim();
+      if (url === '') {
+        localStorage.removeItem('drive_script_url');
+        alert('បានលុបចោល Web App URL!');
+      } else {
+        localStorage.setItem('drive_script_url', url);
+        alert('បានរក្សាទុក Web App URL ដោយជោគជ័យ!');
+        syncFromDrive(true); // ទាញយកទិន្នន័យស្វ័យប្រវត្តិតែម្តងពេលកំណត់រួច
+      }
+    });
+
+    // សរសេរមុខងារសម្រាប់ខ្ចប់ទិន្នន័យទាំងអស់ (Students, Layout, IndexedDB Image, Admin login)
+    async function getPayload() {
+      const dbBg = await getBgImageFromDB();
+      return {
+        students: students,
+        card_layout: savedLayout,
+        bgImage: dbBg,
+        admin_username: adminUsername,
+        admin_password: adminPassword
+      };
+    }
+
+    // សរសេរមុខងារដើម្បីយកទិន្នន័យពី Drive មកដំណើរការលើ Browser
+    async function applyPayload(payload) {
+      if (!payload) return;
+      
+      // ធ្វើបច្ចុប្បន្នភាពទិន្នន័យសិស្ស
+      if (payload.students) {
+        students = payload.students;
+        localStorage.setItem('students', JSON.stringify(students));
+      }
+      
+      // ធ្វើបច្ចុប្បន្នភាពគណនី Admin
+      if (payload.admin_username && payload.admin_password) {
+        adminUsername = payload.admin_username;
+        adminPassword = payload.admin_password;
+        localStorage.setItem('admin_username', adminUsername);
+        localStorage.setItem('admin_password', adminPassword);
+      }
+
+      // ធ្វើបច្ចុប្បន្នភាពទីតាំង Coordinates
+      if (payload.card_layout) {
+        savedLayout = payload.card_layout;
+        const layoutToSave = JSON.parse(JSON.stringify(savedLayout));
+        layoutToSave.bgImage = ""; // កុំទុក Base64 ធំក្នុង LocalStorage
+        localStorage.setItem('card_layout', JSON.stringify(layoutToSave));
+      }
+
+      // ធ្វើបច្ចុប្បន្នភាពរូបភាពក្នុង IndexedDB
+      if (payload.bgImage !== undefined) {
+        savedLayout.bgImage = payload.bgImage;
+        await saveBgImageToDB(payload.bgImage);
+      }
+
+      renderAdminTable();
+    }
+
+    // មុខងារផ្ញើទៅ Drive
+    async function syncToDrive(silent = false) {
+      const url = localStorage.getItem('drive_script_url');
+      if (!url) {
+        if (!silent) alert('សូមកំណត់ Google Apps Script Web App URL ជាមុនសិន!');
+        return;
+      }
+
+      syncStatus.textContent = "កំពុងរក្សាទុកទៅ Drive...";
+
+      try {
+        const payload = await getPayload();
+        const response = await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'text/plain' // Bypass CORS Preflight
+          }
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          syncStatus.textContent = "រក្សាទុកទៅ Drive ជោគជ័យ!";
+          if (!silent) alert('បានរក្សាទុកទិន្នន័យទាំងអស់ទៅកាន់ Google Drive របស់អ្នកដោយជោគជ័យ!');
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (err) {
+        syncStatus.textContent = "រក្សាទុកបរាជ័យ!";
+        console.error(err);
+        if (!silent) alert('ការរក្សាទុកបរាជ័យ៖ ' + err.toString());
+      }
+    }
+
+    // មុខងារទាញយកពី Drive
+    async function syncFromDrive(silent = false) {
+      const url = localStorage.getItem('drive_script_url');
+      if (!url) {
+        if (!silent) alert('សូមកំណត់ Google Apps Script Web App URL ជាមុនសិន!');
+        return;
+      }
+
+      syncStatus.textContent = "កំពុងទាញយកពី Drive...";
+
+      try {
+        const response = await fetch(url);
+        const result = await response.json();
+        if (result.status === "success" && result.data) {
+          await applyPayload(result.data);
+          syncStatus.textContent = "ទាញយកពី Drive ជោគជ័យ!";
+          if (!silent) alert('បានទាញយកទិន្នន័យចុងក្រោយពី Google Drive របស់អ្នកដោយជោគជ័យ!');
+        } else {
+          syncStatus.textContent = "គ្មានទិន្នន័យលើ Drive";
+          if (!silent) alert('គ្មានទិន្នន័យចាស់ដែលត្រូវបានរក្សាទុកនៅលើ Drive ឡើយ!');
+        }
+      } catch (err) {
+        syncStatus.textContent = "ទាញយកបរាជ័យ!";
+        console.error(err);
+        if (!silent) alert('ការទាញយកបរាជ័យ៖ ' + err.toString());
+      }
+    }
+
+    // ដំណើរការរក្សាទុកស្វ័យប្រវត្តពេលមានការប្រែប្រួលទិន្នន័យ (Auto Sync)
+    function autoSyncToDrive() {
+      const url = localStorage.getItem('drive_script_url');
+      if (url) {
+        syncToDrive(true);
+      }
+    }
+
+    btnSyncToDrive.addEventListener('click', () => syncToDrive(false));
+    btnSyncFromDrive.addEventListener('click', () => syncFromDrive(false));
+
     // កំណត់ទិន្នន័យដំបូងពេលបើកទំព័រ
     async function initPage() {
-      try {
-        const dbBg = await getBgImageFromDB();
-        savedLayout.bgImage = dbBg || defaultLayout.bgImage;
-      } catch (err) {
-        console.error("Error loading background image:", err);
+      const url = localStorage.getItem('drive_script_url');
+      if (url) {
+        // ប្រសិនបើធ្លាប់ភ្ជាប់ URL, ទាញយកទិន្នន័យចុងក្រោយពី Drive មកភ្លាម
+        await syncFromDrive(true);
+      } else {
+        // ប្រសិនបើគ្មាន URL, ផ្ទុករូបភាពចាស់ពី IndexedDB មកដំណើរការធម្មតា
+        try {
+          const dbBg = await getBgImageFromDB();
+          savedLayout.bgImage = dbBg || defaultLayout.bgImage;
+        } catch (err) {
+          console.error("Error loading background image:", err);
+        }
+        renderAdminTable();
       }
-      renderAdminTable();
     }
 
     // ហៅដំណើរការកូដផ្ដើម
