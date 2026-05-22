@@ -39,6 +39,12 @@
       height: 500px !important;
       box-sizing: border-box;
       background-repeat: no-repeat !important;
+      /* Safari iOS Rounded Corner Overflow & Crisp Hardware Rendering Bug Fixes */
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      perspective: 1000;
+      -webkit-perspective: 1000;
     }
 
     /* ធាតុដែលត្រូវបានជ្រើសរើស (Selected Field) */
@@ -47,6 +53,27 @@
       outline-offset: 1px;
       background-color: rgba(59, 130, 246, 0.25) !important;
       box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    }
+
+    /* បង្ហាញស៊ុមគែមតារាងឱ្យស្អាត (Table Border styling) */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #d1d5db !important;
+    }
+
+    /* កកក្បាលជួរឈរ (Sticky table columns up to Grade) */
+    .sticky-col-1 { position: sticky; left: 0px; z-index: 10; background-color: white !important; width: 64px; min-width: 64px; }
+    .sticky-col-2 { position: sticky; left: 64px; z-index: 10; background-color: white !important; width: 80px; min-width: 80px; }
+    .sticky-col-3 { position: sticky; left: 144px; z-index: 10; background-color: white !important; width: 140px; min-width: 140px; }
+    .sticky-col-4 { position: sticky; left: 284px; z-index: 10; background-color: white !important; width: 64px; min-width: 64px; }
+    .sticky-col-5 { position: sticky; left: 348px; z-index: 10; background-color: white !important; width: 80px; min-width: 80px; border-right: 2px solid #cbd5e1; }
+
+    thead th.sticky-col-1, thead th.sticky-col-2, thead th.sticky-col-3, thead th.sticky-col-4, thead th.sticky-col-5 {
+      z-index: 30 !important;
+      background-color: #f9fafb !important; /* bg-gray-50 */
     }
   </style>
 </head>
@@ -110,65 +137,71 @@
             </div>
           </div>
 
-          <!-- ផ្នែកខាងស្តាំ៖ ព័ត៌មានលម្អិតរបស់សិស្ស (កែសម្រួលស្ទីលទំនើប គ្មានផ្ទៃប្រផេះ) -->
+          <!-- ផ្នែកខាងស្តាំ៖ ព័ត៌មានលម្អិតរបស់សិស្ស (កំណត់ទំហំអក្សរ 14px ទាំងអស់) -->
           <div class="flex-grow w-full space-y-4 font-battambang">
             <h3 class="font-moul text-blue-800 text-lg border-b pb-2 flex items-center gap-2">
               <i class="fa-solid fa-id-card-clip"></i> ព័ត៌មានលម្អិតសិស្ស
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-700">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-[14px] text-gray-700">
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">អត្តលេខសិស្ស</span>
-                <span id="detail-id" class="text-base font-bold text-blue-900">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">អត្តលេខសិស្ស</span>
+                <span id="detail-id" class="text-[14px] font-bold text-blue-900">-</span>
               </div>
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">គោត្តនាម-នាម</span>
-                <span id="detail-name" class="text-base font-bold text-gray-900">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">គោត្តនាម-នាម</span>
+                <span id="detail-name" class="text-[14px] font-bold text-gray-900">-</span>
               </div>
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">ភេទ</span>
-                <span id="detail-gender" class="text-base font-semibold text-gray-900">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">ភេទ</span>
+                <span id="detail-gender" class="text-[14px] font-semibold text-gray-900">-</span>
               </div>
               
-              <!-- ថ្នាក់រៀន (កែប្រែពីថ្នាក់សិក្សា ហើយផ្លាស់ទីមកក្រោមភេទ) -->
+              <!-- ថ្នាក់រៀន -->
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">ថ្នាក់រៀន</span>
-                <span id="detail-grade" class="text-base font-bold text-gray-900">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">ថ្នាក់រៀន</span>
+                <span id="detail-grade" class="text-[14px] font-bold text-gray-900">-</span>
               </div>
 
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">ថ្ងៃខែឆ្នាំកំណើត</span>
-                <span id="detail-dob" class="text-base font-semibold text-gray-900">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">ថ្ងៃខែឆ្នាំកំណើត</span>
+                <span id="detail-dob" class="text-[14px] font-semibold text-gray-900">-</span>
               </div>
               
-              <!-- ទីកន្លែងកំណើត បំបែកជា ភូមិ ឃុំ ស្រុក ខេត្ត (ទម្រង់ម៉ដស្អាត គ្មានផ្ទៃប្រផេះ) -->
+              <!-- ទីកន្លែងកំណើត បំបែកជា ភូមិ ឃុំ ស្រុក ខេត្ត -->
               <div class="md:col-span-2 border-b border-gray-100 py-2.5">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider block mb-2">ទីកន្លែងកំណើត</span>
-                <div class="space-y-2 text-sm text-gray-900 font-battambang">
-                  <!-- ភូមិ | ឃុំ -->
-                  <div class="flex justify-between items-center">
-                    <div>ភូមិ : <span id="detail-village" class="font-semibold text-gray-800 ml-1">-</span></div>
-                    <div>ឃុំ/សង្កាត់ : <span id="detail-commune" class="font-semibold text-gray-800 ml-1">-</span></div>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider block mb-2">ទីកន្លែងកំណើត</span>
+                <div class="space-y-2 text-[14px] text-gray-900 font-battambang">
+                  <div class="flex justify-between items-center text-[14px]">
+                    <div class="text-[14px]">ភូមិ : <span id="detail-village" class="font-semibold text-gray-800 ml-1 text-[14px]">-</span></div>
+                    <div class="text-[14px]">ឃុំ/សង្កាត់ : <span id="detail-commune" class="font-semibold text-gray-800 ml-1 text-[14px]">-</span></div>
                   </div>
-                  <!-- ស្រុក | ខេត្ត -->
-                  <div class="flex justify-between items-center">
-                    <div>ស្រុក/ខណ្ឌ : <span id="detail-district" class="font-semibold text-gray-800 ml-1">-</span></div>
-                    <div>ខេត្ត/ក្រុង : <span id="detail-province" class="font-semibold text-gray-800 ml-1">-</span></div>
+                  <div class="flex justify-between items-center text-[14px]">
+                    <div class="text-[14px]">ស្រុក/ខណ្ឌ : <span id="detail-district" class="font-semibold text-gray-800 ml-1 text-[14px]">-</span></div>
+                    <div class="text-[14px]">ខេត្ត/ក្រុង : <span id="detail-province" class="font-semibold text-gray-800 ml-1 text-[14px]">-</span></div>
                   </div>
                 </div>
               </div>
 
               <div class="border-b border-gray-100 py-2.5 flex flex-col justify-center">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider mb-0.5">ឈ្មោះឪពុក និងមុខរបរ</span>
-                <span id="detail-father" class="text-sm text-gray-950 font-semibold">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider mb-0.5">ឈ្មោះឪពុក</span>
+                <span id="detail-father-name" class="text-[14px] text-gray-950 font-semibold">-</span>
               </div>
               <div class="border-b border-gray-100 py-2.5 flex flex-col justify-center">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider mb-0.5">ឈ្មោះម្តាយ និងមុខរបរ</span>
-                <span id="detail-mother" class="text-sm text-gray-950 font-semibold">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider mb-0.5">មុខរបរឪពុក</span>
+                <span id="detail-father-job" class="text-[14px] text-gray-950 font-semibold">-</span>
+              </div>
+              <div class="border-b border-gray-100 py-2.5 flex flex-col justify-center">
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider mb-0.5">ឈ្មោះម្តាយ</span>
+                <span id="detail-mother-name" class="text-[14px] text-gray-950 font-semibold">-</span>
+              </div>
+              <div class="border-b border-gray-100 py-2.5 flex flex-col justify-center">
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider mb-0.5">មុខរបរម្តាយ</span>
+                <span id="detail-mother-job" class="text-[14px] text-gray-950 font-semibold">-</span>
               </div>
               
               <div class="border-b border-gray-100 py-2.5 flex items-center justify-between md:col-span-2">
-                <span class="font-bold text-gray-400 text-[13px] uppercase tracking-wider">លេខទូរស័ព្ទអាណាព្យាបាល</span>
-                <span id="detail-phone" class="text-base font-bold text-blue-700">-</span>
+                <span class="font-bold text-gray-400 text-[14px] uppercase tracking-wider">លេខទូរស័ព្ទអាណាព្យាបាល</span>
+                <span id="detail-phone" class="text-[14px] font-bold text-blue-700">-</span>
               </div>
             </div>
           </div>
@@ -206,53 +239,43 @@
     <!-- 3. ផ្ទាំងគ្រប់គ្រងទិន្នន័យ (Admin Dashboard) -->
     <section id="section-admin-panel" class="hidden space-y-6">
       
-      <!-- របារគ្រប់គ្រងទូទៅ -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-lg shadow-sm gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-gears mr-2 text-amber-600"></i>ផ្ទាំងគ្រប់គ្រងទិន្នន័យសិស្ស (Admin)</h2>
-          <p class="text-sm text-gray-500">គ្រប់គ្រងទិន្នន័យសិស្ស និងកែសម្រួលប្លង់កាតសិស្ស</p>
+      <!-- ផ្ទាំងគ្រប់គ្រងទិន្នន័យសិស្ស (Admin) - កែសម្រួលក្បាលប្លុក និងរចនាប៊ូតុងឱ្យស្អាត -->
+      <div id="section-admin-panel-header" class="bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500 space-y-4">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center pb-2 border-b gap-4">
+          <h3 class="text-lg font-semibold text-gray-800 flex items-center font-moul">
+            <i class="fa-solid fa-gears mr-2 text-amber-600"></i>ផ្ទាំងគ្រប់គ្រងទិន្នន័យសិស្ស (Admin)
+          </h3>
+          <div class="flex flex-wrap gap-2 text-white">
+            <button id="btn-toggle-designer" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-crop-simple mr-1"></i> រៀបចំប្លង់កាតសិស្ស
+            </button>
+            <button id="btn-toggle-watermark" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-stamp mr-1"></i> កំណត់ Watermark
+            </button>
+            <button id="btn-open-pdf-modal" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-file-pdf mr-1"></i> រក្សាទុកកាតសិស្ស (PDF)
+            </button>
+            <button id="btn-export-excel" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-file-excel mr-1"></i> ទាញយកជា Excel (XLSX)
+            </button>
+            <button id="btn-toggle-account-settings" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-user-gear mr-1"></i> កំណត់គណនី Admin
+            </button>
+            <button id="btn-download-template" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-file-csv mr-1"></i> ឯកសារគំរូ CSV
+            </button>
+            <button id="btn-add-manual" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-plus mr-1"></i> បញ្ចូលសិស្សដោយផ្ទាល់
+            </button>
+            <button id="btn-delete-all-students" class="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-xs rounded font-semibold shadow transition duration-200">
+              <i class="fa-solid fa-trash-can mr-1"></i> លុបសិស្សទាំងអស់
+            </button>
+            <button id="btn-admin-logout" class="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-xs rounded font-semibold shadow transition duration-200">
+              ចាកចេញ
+            </button>
+          </div>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <button id="btn-toggle-designer" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-crop-simple mr-1"></i> រៀបចំប្លង់កាតសិស្ស
-          </button>
-
-          <!-- ប៊ូតុងកំណត់ Watermark -->
-          <button id="btn-toggle-watermark" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-stamp mr-1"></i> កំណត់ Watermark
-          </button>
-
-          <!-- ប៊ូតុងរក្សាទុកកាតសិស្សជា PDF -->
-          <button id="btn-open-pdf-modal" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-file-pdf mr-1"></i> រក្សាទុកកាតសិស្ស (PDF)
-          </button>
-          
-          <!-- ប៊ូតុងទាញយកជា Excel XLSX -->
-          <button id="btn-export-excel" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-file-excel mr-1"></i> ទាញយកជា Excel (XLSX)
-          </button>
-
-          <!-- ប៊ូតុងកំណត់គណនី Admin ពណ៌ស្វាយ -->
-          <button id="btn-toggle-account-settings" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-user-gear mr-1"></i> កំណត់គណនី Admin
-          </button>
-          
-          <button id="btn-download-template" class="px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm rounded transition">
-            <i class="fa-solid fa-file-csv mr-1"></i> ឯកសារគំរូ CSV
-          </button>
-          <button id="btn-add-manual" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded transition">
-            <i class="fa-solid fa-plus mr-1"></i> បញ្ចូលសិស្សដោយផ្ទាល់
-          </button>
-
-          <!-- ប៊ូតុងលុបសិស្សទាំងអស់ ពណ៌ក្រហម -->
-          <button id="btn-delete-all-students" class="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-sm rounded transition font-semibold shadow">
-            <i class="fa-solid fa-trash-can mr-1"></i> លុបសិស្សទាំងអស់
-          </button>
-
-          <button id="btn-admin-logout" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm rounded transition">
-            ចាកចេញ
-          </button>
-        </div>
+        <p class="text-xs text-gray-500">គ្រប់គ្រងទិន្នន័យសិស្ស កែសម្រួលប្លង់កាតសិស្ស និងកំណត់គណនីប្រើប្រាស់</p>
       </div>
 
       <!-- ផ្នែកភ្ជាប់ទំនាក់ទំនង Google Drive និងការសមកាលកម្ម -->
@@ -577,13 +600,24 @@
             <input type="text" id="input-province" required placeholder="ឧ. ព្រៃវែង" class="w-full px-3 py-1.5 border rounded text-sm">
           </div>
 
+          <!-- បំបែកក្បាលជួរឈរ ឈ្មោះឪពុក និង មុខរបរ -->
           <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">ឈ្មោះឪពុក និងមុខរបរ</label>
-            <input type="text" id="input-father" placeholder="ឧ. ស៊ន សារ៉េត (កសិករ)" class="w-full px-3 py-1.5 border rounded text-sm">
+            <label class="block text-xs font-semibold text-gray-700 mb-1">ឈ្មោះឪពុក *</label>
+            <input type="text" id="input-father-name" placeholder="ឧ. ស៊ន សារ៉េត" required class="w-full px-3 py-1.5 border rounded text-sm">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">ឈ្មោះម្តាយ និងមុខរបរ</label>
-            <input type="text" id="input-mother" placeholder="ឧ. ម៉ៅ សុខា (មេផ្ទះ)" class="w-full px-3 py-1.5 border rounded text-sm">
+            <label class="block text-xs font-semibold text-gray-700 mb-1">មុខរបរឪពុក</label>
+            <input type="text" id="input-father-job" placeholder="ឧ. កសិករ" class="w-full px-3 py-1.5 border rounded text-sm">
+          </div>
+
+          <!-- បំបែកក្បាលជួរឈរ ឈ្មោះម្តាយ និង មុខរបរ -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">ឈ្មោះម្តាយ *</label>
+            <input type="text" id="input-mother-name" placeholder="ឧ. ម៉ៅ សុខា" required class="w-full px-3 py-1.5 border rounded text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">មុខរបរម្តាយ</label>
+            <input type="text" id="input-mother-job" placeholder="ឧ. មេផ្ទះ" class="w-full px-3 py-1.5 border rounded text-sm">
           </div>
           
           <!-- ប្រអប់បញ្ចូលលេខទូរស័ព្ទអាណាព្យាបាល -->
@@ -592,58 +626,111 @@
             <input type="text" id="input-phone" placeholder="ឧ. 012345678" class="w-full px-3 py-1.5 border rounded text-sm">
           </div>
 
-          <div>
+          <!-- ប្រអប់រូបថតសិស្ស (គាំទ្រការអូសទាញទម្លាក់រូបភាព និងលុបរូបថតចាស់ចោល) -->
+          <div class="md:col-span-3">
             <label class="block text-xs font-semibold text-gray-700 mb-1">រូបថតសិស្ស (3x4)</label>
-            <input type="file" id="input-photo" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <div id="photo-dropzone" class="border-2 border-dashed border-blue-300 rounded-lg p-4 bg-blue-50/20 text-center relative hover:bg-blue-50/50 transition cursor-pointer flex flex-col items-center justify-center min-h-[140px]">
+              <input type="file" id="input-photo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+              <div id="photo-upload-placeholder" class="space-y-2 flex flex-col items-center">
+                <i class="fa-solid fa-camera text-3xl text-blue-500"></i>
+                <p class="text-xs text-gray-600">អូសនិងទម្លាក់រូបថត ឬចុចទីនេះដើម្បីជ្រើសរើស</p>
+                <p class="text-[10px] text-gray-400">ទំហំគំរូ 3x4 (JPG/PNG)</p>
+              </div>
+              <div id="photo-upload-preview-container" class="hidden relative z-30 flex flex-col items-center">
+                <img id="photo-upload-preview" class="w-20 h-24 object-cover border rounded shadow-sm">
+                <button type="button" id="btn-remove-photo" class="mt-2 px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-[10px] rounded flex items-center gap-1 transition">
+                  <i class="fa-solid fa-trash-can"></i> លុបរូបថតចេញ
+                </button>
+              </div>
+            </div>
           </div>
+
           <div class="md:col-span-3 flex justify-end space-x-2">
             <button type="button" id="btn-cancel-manual" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300">បោះបង់</button>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-500">រក្សាទុក</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-500 font-semibold">រក្សាទុក</button>
           </div>
         </form>
       </div>
 
-      <!-- តារាងគ្រប់គ្រងទិន្នន័យសិស្ស (បង្ហាញព័ត៌មានលម្អិតទាំងអស់ បំបែក ភូមិ ឃុំ ស្រុក ខេត្ត) -->
-      <div class="bg-white p-6 rounded-lg shadow-md relative">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-          <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-users mr-2 text-blue-800"></i>បញ្ជីរាយនាមសិស្សក្នុងប្រព័ន្ធ</h3>
-          <input type="text" id="admin-search-input" placeholder="ស្វែងរកតាមអត្តលេខ ឬឈ្មោះ..." class="px-3 py-1 border rounded text-sm focus:outline-none w-full md:w-64">
+      <!-- បញ្ជីរាយនាមសិស្សក្នុងប្រព័ន្ធ (Cambodia Theme Banner & Filters) -->
+      <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-800 space-y-4 relative">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center pb-2 border-b gap-4">
+          <h3 class="text-lg font-semibold text-gray-800 flex items-center font-moul">
+            <i class="fa-solid fa-users mr-2 text-blue-800"></i>បញ្ជីរាយនាមសិស្សក្នុងប្រព័ន្ធ
+          </h3>
+          <!-- មុខងារច្រោះស្វែងរកទិន្នន័យសិស្សកម្រិតខ្ពស់ និងស្អាតជាងមុន -->
+          <div class="flex flex-wrap items-center gap-2 text-black w-full lg:w-auto">
+            <span class="text-xs text-gray-500 font-semibold hidden md:inline"><i class="fa-solid fa-filter mr-1"></i>ច្រោះទិន្នន័យ៖</span>
+            
+            <input type="text" id="admin-search-input" placeholder="ស្វែងរកអត្តលេខ/ឈ្មោះ..." class="px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-full md:w-40 bg-gray-50">
+            
+            <select id="filter-admin-gender" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang">
+              <option value="">ភេទទាំងអស់</option>
+              <option value="ប្រុស">ប្រុស</option>
+              <option value="ស្រី">ស្រី</option>
+            </select>
+            
+            <select id="filter-admin-grade" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang">
+              <option value="">ថ្នាក់ទាំងអស់</option>
+            </select>
+
+            <!-- ប៊ូតុង Filter ភូមិ ឃុំ ស្រុក ខេត្ត ឱ្យស្អាតជាងមុន -->
+            <select id="filter-admin-village" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang max-w-[110px]">
+              <option value="">ភូមិទាំងអស់</option>
+            </select>
+
+            <select id="filter-admin-commune" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang max-w-[110px]">
+              <option value="">ឃុំទាំងអស់</option>
+            </select>
+
+            <select id="filter-admin-district" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang max-w-[110px]">
+              <option value="">ស្រុកទាំងអស់</option>
+            </select>
+
+            <select id="filter-admin-province" class="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-battambang max-w-[110px]">
+              <option value="">ខេត្តទាំងអស់</option>
+            </select>
+          </div>
         </div>
 
-        <!-- ផ្នែករបាយការណ៍សង្ខេបទិន្នន័យសិស្ស -->
-        <div id="student-report-summary" class="space-y-4 mb-6">
-          <!-- ទិន្នន័យបង្កើតដោយ JS -->
-        </div>
+        <div class="p-2 space-y-6">
+          <!-- ផ្នែករបាយការណ៍សង្ខេបទិន្នន័យសិស្ស -->
+          <div id="student-report-summary" class="space-y-4">
+            <!-- ទិន្នន័យបង្កើតដោយ JS -->
+          </div>
 
-        <div class="overflow-x-auto" id="table-scroll-wrapper">
-          <table class="min-w-full text-sm text-left text-gray-500 border-collapse border border-gray-200">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 font-bold">
-              <tr>
-                <th class="px-4 py-3 border border-gray-200">រូបថត</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">អត្តលេខ</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ឈ្មោះសិស្ស</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ភេទ</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ថ្នាក់</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ថ្ងៃខែឆ្នាំកំណើត</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ភូមិ</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ឃុំ/សង្កាត់</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ស្រុក/ខណ្ឌ</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ខេត្ត/ក្រុង</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ព័ត៌មានឪពុក</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ព័ត៌មានម្តាយ</th>
-                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">លេខទូរស័ព្ទអាណាព្យាបាល</th>
-                <th class="px-4 py-3 text-center border border-gray-200 whitespace-nowrap">សកម្មភាព</th>
-              </tr>
-            </thead>
-            <tbody id="student-table-body" class="divide-y divide-gray-200">
-              <!-- ទិន្នន័យបញ្ចូលដោយ JS -->
-            </tbody>
-          </table>
+          <div class="overflow-x-auto" id="table-scroll-wrapper">
+            <table class="min-w-full text-sm text-left text-gray-500 border-collapse border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50 font-bold">
+                <tr>
+                  <th class="sticky-col-1 border border-gray-300 text-center">រូបថត</th>
+                  <th class="sticky-col-2 border border-gray-300 whitespace-nowrap">អត្តលេខ</th>
+                  <th class="sticky-col-3 border border-gray-300 whitespace-nowrap">ឈ្មោះសិស្ស</th>
+                  <th class="sticky-col-4 border border-gray-300 whitespace-nowrap">ភេទ</th>
+                  <th class="sticky-col-5 border border-gray-300 whitespace-nowrap">ថ្នាក់</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ថ្ងៃខែឆ្នាំកំណើត</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ភូមិ</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ឃុំ/សង្កាត់</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ស្រុក/ខណ្ឌ</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ខេត្ត/ក្រុង</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ឈ្មោះឪពុក</th>
+                  <th class="border border-gray-300 whitespace-nowrap">មុខរបរឪពុក</th>
+                  <th class="border border-gray-300 whitespace-nowrap">ឈ្មោះម្ដាយ</th>
+                  <th class="border border-gray-300 whitespace-nowrap">មុខរបរម្ដាយ</th>
+                  <th class="border border-gray-300 whitespace-nowrap">លេខទូរស័ព្ទអាណាព្យាបាល</th>
+                  <th class="text-center border border-gray-300 whitespace-nowrap">សកម្មភាព</th>
+                </tr>
+              </thead>
+              <tbody id="student-table-body" class="divide-y divide-gray-200 bg-white">
+                <!-- ទិន្នន័យបញ្ចូលដោយ JS -->
+              </tbody>
+            </table>
+          </div>
+          <div id="no-data-msg" class="text-center py-6 text-gray-400 hidden">មិនទាន់មានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធនៅឡើយទេ</div>
         </div>
-        <div id="no-data-msg" class="text-center py-6 text-gray-400 hidden">មិនទាន់មានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធនៅឡើយទេ</div>
 
         <!-- Sticky Floating scrollbar for easily sliding left & right anywhere on viewport -->
-        <div id="sticky-scroll-wrapper" class="sticky bottom-0 left-0 right-0 overflow-x-auto bg-gray-50/90 backdrop-blur-sm z-40 border-t border-gray-200" style="height: 14px; display: none;">
+        <div id="sticky-scroll-wrapper" class="sticky bottom-0 left-0 right-0 overflow-x-auto bg-white/95 backdrop-blur-sm z-40 border-t border-gray-300 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]" style="height: 14px; display: none;">
           <div id="sticky-scroll-content" style="height: 1px;"></div>
         </div>
       </div>
@@ -725,7 +812,7 @@
   </div>
 
   <!-- Temporary Card Container for Rendering Hidden Cards (for PDF generation) - លុប Border ចេញ -->
-  <div id="temp-pdf-render-container" class="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none" style="width: 375px; height: 500px; overflow: hidden;">
+  <div id="temp-pdf-render-container" class="absolute top-0 left-0 -z-50 opacity-0 pointer-events-none" style="width: 375px; height: 500px; overflow: hidden; padding: 0; margin: 0;">
     <div id="temp-pdf-card" class="student-card-size bg-white relative overflow-hidden"></div>
   </div>
 
@@ -755,7 +842,7 @@
 
     let savedLayout = JSON.parse(localStorage.getItem('card_layout')) || defaultLayout;
 
-    // ទិន្នន័យសិស្សគំរូដំបូងបង្អស់សម្រាប់បង្ហាញ (បំបែក ភូមិ ឃុំ ស្រុក ខេត្ត)
+    // ទិន្នន័យសិស្សគំរូដំបូងបង្អស់សម្រាប់បង្ហាញ (បំបែក ភូមិ ឃុំ ស្រុក ខេត្ត, ឈ្មោះឪពុកម្តាយ និងមុខរបរ)
     const initialStudents = [
       {
         id: "001",
@@ -767,14 +854,31 @@
         commune: "បឹងព្រះ",
         district: "បាភ្នំ",
         province: "ព្រៃវែង",
-        father: "ស៊ន សារ៉េត (កសិករ)",
-        mother: "ម៉ៅ សុខា (មេផ្ទះ)",
+        fatherName: "ស៊ន សារ៉េត",
+        fatherJob: "កសិករ",
+        motherName: "ម៉ៅ សុខា",
+        motherJob: "មេផ្ទះ",
         photo: "",
         phone: "012345678"
       }
     ];
 
     let students = JSON.parse(localStorage.getItem('students')) || initialStudents;
+    
+    // ការពារការបាត់បង់ទិន្នន័យចាស់ដោយបម្លែងទម្រង់ចាស់ទៅថ្មី
+    students.forEach(s => {
+      if (s.father && !s.fatherName) {
+        const parts = s.father.split('(');
+        s.fatherName = parts[0].trim();
+        s.fatherJob = parts[1] ? parts[1].replace(')', '').trim() : '';
+      }
+      if (s.mother && !s.motherName) {
+        const parts = s.mother.split('(');
+        s.motherName = parts[0].trim();
+        s.motherJob = parts[1] ? parts[1].replace(')', '').trim() : '';
+      }
+    });
+
     if(!localStorage.getItem('students')) {
       localStorage.setItem('students', JSON.stringify(students));
     }
@@ -865,6 +969,14 @@
     const lblPhotoW = document.getElementById('lbl-photo-w');
     const lblPhotoH = document.getElementById('lbl-photo-h');
 
+    // Drag & Drop Photo Upload Elements
+    const photoDropzone = document.getElementById('photo-dropzone');
+    const photoInput = document.getElementById('input-photo');
+    const photoUploadPlaceholder = document.getElementById('photo-upload-placeholder');
+    const photoUploadPreviewContainer = document.getElementById('photo-upload-preview-container');
+    const photoUploadPreview = document.getElementById('photo-upload-preview');
+    const btnRemovePhoto = document.getElementById('btn-remove-photo');
+
     // Admin Login & Tables
     const adminUsernameInput = document.getElementById('admin-username-input');
     const adminPasswordInput = document.getElementById('admin-password-input');
@@ -953,7 +1065,7 @@
       }
     }
 
-    // ២. បង្កើតរចនាសម្ព័ន្ធ Elements នៅក្នុងកាតសិស្ស (កំណត់ Photo Background ជា Transparent និងដាក់ឆ្នាំសិក្សាដែលអាចកែប្រែបាន)
+    // ២. បង្កើតរចនាសម្ព័ន្ធ Elements នៅក្នុងកាតសិស្ស (កំណត់ Photo Background ជា Transparent និងដាក់ឆ្នាំសិក្សាដែលអាចកែប្រែបាន រួមទាំងដោះស្រាយ Text layout នៅលើ iOS)
     function buildCardDOM(container, isDesignMode = false) {
       container.innerHTML = '';
       
@@ -967,13 +1079,13 @@
             </div>
           </div>`, style: `width: ${savedLayout.photo.width}; height: ${savedLayout.photo.height};` },
         
-        { id: 'id', html: `អត្តលេខ: <span id="card-id" class="text-blue-700 font-bold ml-1"></span>`, style: `font-size: ${savedLayout.id.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'name', html: `ឈ្មោះ: <span id="card-name" class="text-blue-700 font-bold ml-1"></span>`, style: `font-size: ${savedLayout.name.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'gender', html: `ភេទ: <span id="card-gender" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.gender.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'nationality', html: `សញ្ជាតិ: <span class="text-blue-700 ml-1">ខ្មែរ</span>`, style: `font-size: ${savedLayout.nationality.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'dob', html: `ថ្ងៃខែឆ្នាំកំណើត: <span id="card-dob" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.dob.fontSize || 13}px; line-height: 1.2;` },
-        { id: 'grade', html: `ថ្នាក់ទី: <span id="card-grade" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.grade.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'year', html: `ឆ្នាំសិក្សា: <span id="card-year" class="text-blue-700 ml-1">${savedLayout.academicYear || '2025-2026'}</span>`, style: `font-size: ${savedLayout.year.fontSize || 14}px; line-height: 1.2;` }
+        { id: 'id', html: `អត្តលេខ: <span id="card-id" class="text-blue-700 font-bold ml-1"></span>`, style: `font-size: ${savedLayout.id.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'name', html: `ឈ្មោះ: <span id="card-name" class="text-blue-700 font-bold ml-1"></span>`, style: `font-size: ${savedLayout.name.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'gender', html: `ភេទ: <span id="card-gender" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.gender.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'nationality', html: `សញ្ជាតិ: <span class="text-blue-700 ml-1">ខ្មែរ</span>`, style: `font-size: ${savedLayout.nationality.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'dob', html: `ថ្ងៃខែឆ្នាំកំណើត: <span id="card-dob" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.dob.fontSize || 13}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'grade', html: `ថ្នាក់ទី: <span id="card-grade" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.grade.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` },
+        { id: 'year', html: `ឆ្នាំសិក្សា: <span id="card-year" class="text-blue-700 ml-1">${savedLayout.academicYear || '2025-2026'}</span>`, style: `font-size: ${savedLayout.year.fontSize || 14}px; line-height: 1.2; white-space: nowrap;` }
       ];
 
       // អនុវត្តទំហំ និងទីតាំងរូបភាពផ្ទៃក្រោយ
@@ -1131,6 +1243,11 @@
             bgImg.style.zIndex = '0';
             bgImg.style.maxWidth = 'none';
             bgImg.style.maxHeight = 'none';
+            // iOS Hardware acceleration & Crisp render subpixel alignment style settings
+            bgImg.style.webkitTransformStyle = 'preserve-3d';
+            bgImg.style.transformStyle = 'preserve-3d';
+            bgImg.style.webkitBackfaceVisibility = 'hidden';
+            bgImg.style.backfaceVisibility = 'hidden';
             if (container.firstChild) {
               container.insertBefore(bgImg, container.firstChild);
             } else {
@@ -1545,6 +1662,7 @@
       }
     });
 
+    // មុខងាររក្សាទុកព័ត៌មានគណនី Admin ថ្មី និងផ្ញើសារបញ្ជាក់ទៅ Gmail (ដោះស្រាយបញ្ហារក្សាទុកប្រអប់សំបុត្រ Gmail confirm_admin_gmail)
     btnSaveAccountChange.addEventListener('click', () => {
       const newUser = document.getElementById('new-admin-user').value.trim();
       const newPass = document.getElementById('new-admin-pass').value.trim();
@@ -1560,10 +1678,12 @@
         return;
       }
 
+      // រក្សាទុកព័ត៌មានគណនីថ្មី
       adminUsername = newUser;
       adminPassword = newPass;
       localStorage.setItem('admin_username', newUser);
       localStorage.setItem('admin_password', newPass);
+      localStorage.setItem('confirm_admin_gmail', gmailAddr); // ដោះស្រាយបញ្ហារក្សាទុក Gmail សង្គ្រោះ
 
       const subject = encodeURIComponent("ការបញ្ជាក់ពីការផ្លាស់ប្តូរគណនី Admin - ប្រព័ន្ធសាលារៀន");
       const body = encodeURIComponent(
@@ -1575,7 +1695,7 @@
 
       const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${gmailAddr}&su=${subject}&body=${body}`;
 
-      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីរួចរាល់! ប្រព័ន្ធនឹងបើកផ្ចាំ Gmail ក្នុង Browser របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់គណនី Gmail របស់អ្នក។');
+      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីរួចរាល់! ប្រព័ន្ធនឹងបើកផ្ទាំង Gmail ក្នុង Browser របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់គណនី Gmail របស់អ្នក។');
       
       autoSyncToDrive();
       
@@ -1583,12 +1703,13 @@
       adminAccountSection.classList.add('hidden');
     });
 
+    // ភ្លេចលេខសម្ងាត់ (Forgot Password) - ប្ដូរផ្ទាំងបង្ហាញសារ និងសង្គ្រោះតាម Gmail ដែលបានរក្សាទុក ( កុំបង្ហាញលេខសម្ងាត់នៅលើ Browser ដោយផ្ទាល់ )
     const btnForgotPassword = document.getElementById('btn-forgot-password');
     btnForgotPassword.addEventListener('click', () => {
       const currentRecoveryGmail = localStorage.getItem('confirm_admin_gmail');
       
       if (!currentRecoveryGmail) {
-        alert('គណនីរបស់អ្នកមិនទាន់បានកំណត់ Gmail សម្រាប់សង្គ្រោះឡើយ! សូមចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង (Admin) រួចកំណត់ប្រអប់សំបុត្រ Gmail ជាមុនសិន។\n\nទំនាក់ទំនង : 0966187972');
+        alert('គណនីរបស់អ្នកមិនទាន់បានកំណត់ Gmail សម្រាប់សង្គ្រោះឡើយ! សូមចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង (Admin) រួចកំណត់ប្រអប់សំបុត្រ Gmail ជាមុនសិន។\n\nសូមទំនាក់ទំនងតាមលេខទូរស័ព្ទ : 0966187972 ឬ Email : sengva.kh@gmail.com');
         return;
       }
 
@@ -1605,7 +1726,7 @@
         );
         const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${currentRecoveryGmail}&su=${subject}&body=${body}`;
 
-        alert(`ផ្ទៀងផ្ទាត់ជោគជ័យ! ប្រព័ន្ធនឹងបង្ហាញលេខសម្ងាត់ និងបើកផ្ទាំង Gmail របស់អ្នក៖\n\nUsername៖ ${adminUsername}\nPassword៖ ${adminPassword}`);
+        // បើកផ្ទាំង Compose របស់ Gmail ដោយផ្ទាល់ ដោយមិនចាំបាច់បង្ហាញសារគណនីសម្ងាត់លើអេក្រង់ឡើយ
         window.open(gmailComposeUrl, '_blank');
       } else {
         alert('អាសយដ្ឋាន Gmail មិនត្រឹមត្រូវ ឬមិនត្រូវគ្នានឹងគណនីដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធឡើយ!');
@@ -1698,8 +1819,10 @@
         document.getElementById('detail-district').textContent = student.district || 'មិនមាន';
         document.getElementById('detail-province').textContent = student.province || 'មិនមាន';
 
-        document.getElementById('detail-father').textContent = student.father || 'មិនមានទិន្នន័យ';
-        document.getElementById('detail-mother').textContent = student.mother || 'មិនមានទិន្នន័យ';
+        document.getElementById('detail-father-name').textContent = student.fatherName || 'មិនមាន';
+        document.getElementById('detail-father-job').textContent = student.fatherJob || 'មិនមាន';
+        document.getElementById('detail-mother-name').textContent = student.motherName || 'មិនមាន';
+        document.getElementById('detail-mother-job').textContent = student.motherJob || 'មិនមាន';
         document.getElementById('detail-phone').textContent = student.phone || 'មិនមានទិន្នន័យ';
         document.getElementById('detail-grade').textContent = student.grade;
 
@@ -1773,10 +1896,10 @@
       sortedGrades.forEach(grade => {
         const count = gradeCounts[grade];
         gradeHtml += `
-          <div class="bg-blue-50/50 border border-blue-100/50 rounded-lg p-3 text-center font-battambang transition hover:shadow-sm">
-            <div class="text-xs font-bold text-blue-800">ថ្នាក់ ${grade}</div>
-            <div class="text-base font-bold text-gray-900 mt-1">${count.total} នាក់</div>
-            <div class="text-xs text-pink-600 font-semibold mt-0.5">ស្រី: <span class="font-bold">${count.female}</span> នាក់</div>
+          <div class="bg-blue-50/50 border border-blue-100/50 rounded-lg p-3 text-center font-battambang transition hover:shadow-sm text-[13px]">
+            <div class="font-bold text-blue-800 text-[13px]">ថ្នាក់ ${grade}</div>
+            <div class="font-bold text-gray-900 mt-1 text-[13px]">${count.total} នាក់</div>
+            <div class="text-pink-600 font-semibold mt-0.5 text-[13px]">ស្រី: <span class="font-bold text-[13px]">${count.female}</span> នាក់</div>
           </div>
         `;
       });
@@ -1811,7 +1934,7 @@
           </div>
 
           <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
-            <div class="text-xs font-semibold text-gray-500 uppercase border-b pb-2 mb-3 font-battambang flex items-center gap-1.5">
+            <div class="text-xs font-semibold text-gray-500 uppercase border-b pb-2 mb-3 font-battambang flex items-center gap-1.5 text-[13px]">
               <i class="fa-solid fa-graduation-cap text-indigo-600"></i> ចំនួនសិស្សបំបែកតាមថ្នាក់រៀន
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -1822,15 +1945,69 @@
       }
     }
 
-    // ១២. គ្រប់គ្រងបញ្ជីទិន្នន័យសិស្ស (ទទឹងតារាងស្មើទិន្នន័យ លុបការកម្រិតប្រវែងចាស់ចេញ)
+    // ធ្វើបច្ចុប្បន្នភាពបញ្ជីថ្នាក់រៀនសម្រាប់ចម្រោះព័ត៌មាន (Filter)
+    function updateAdminFilterDropdowns() {
+      const filterGrade = document.getElementById('filter-admin-grade');
+      const filterVillage = document.getElementById('filter-admin-village');
+      const filterCommune = document.getElementById('filter-admin-commune');
+      const filterDistrict = document.getElementById('filter-admin-district');
+      const filterProvince = document.getElementById('filter-admin-province');
+
+      const selectedGrade = filterGrade.value;
+      const selectedVillage = filterVillage.value;
+      const selectedCommune = filterCommune.value;
+      const selectedDistrict = filterDistrict.value;
+      const selectedProvince = filterProvince.value;
+
+      filterGrade.innerHTML = '<option value="">ថ្នាក់ទាំងអស់</option>';
+      filterVillage.innerHTML = '<option value="">ភូមិទាំងអស់</option>';
+      filterCommune.innerHTML = '<option value="">ឃុំទាំងអស់</option>';
+      filterDistrict.innerHTML = '<option value="">ស្រុកទាំងអស់</option>';
+      filterProvince.innerHTML = '<option value="">ខេត្តទាំងអស់</option>';
+
+      const grades = [...new Set(students.map(s => s.grade || ''))].filter(Boolean).sort();
+      const villages = [...new Set(students.map(s => s.village || ''))].filter(Boolean).sort();
+      const communes = [...new Set(students.map(s => s.commune || ''))].filter(Boolean).sort();
+      const districts = [...new Set(students.map(s => s.district || ''))].filter(Boolean).sort();
+      const provinces = [...new Set(students.map(s => s.province || ''))].filter(Boolean).sort();
+
+      grades.forEach(g => filterGrade.appendChild(new Option(`ថ្នាក់ ${g}`, g)));
+      villages.forEach(v => filterVillage.appendChild(new Option(v, v)));
+      communes.forEach(c => filterCommune.appendChild(new Option(c, c)));
+      districts.forEach(d => filterDistrict.appendChild(new Option(d, d)));
+      provinces.forEach(p => filterProvince.appendChild(new Option(p, p)));
+
+      filterGrade.value = selectedGrade;
+      filterVillage.value = selectedVillage;
+      filterCommune.value = selectedCommune;
+      filterDistrict.value = selectedDistrict;
+      filterProvince.value = selectedProvince;
+    }
+
+    // ១២. គ្រប់គ្រងបញ្ជីទិន្នន័យសិស្ស (ទទឹងតារាងស្មើទិន្នន័យ លុបការកម្រិតប្រវែងចាស់ចេញ និងកែសម្រួលដោះស្រាយកំហុស query អថេរ)
     function renderAdminTable(filterQuery = '') {
       renderStudentReport();
+      updateAdminFilterDropdowns();
+
+      const filterGender = document.getElementById('filter-admin-gender').value;
+      const filterGrade = document.getElementById('filter-admin-grade').value;
+      const filterVillage = document.getElementById('filter-admin-village').value;
+      const filterCommune = document.getElementById('filter-admin-commune').value;
+      const filterDistrict = document.getElementById('filter-admin-district').value;
+      const filterProvince = document.getElementById('filter-admin-province').value;
 
       studentTableBody.innerHTML = '';
-      const filtered = students.filter(s => 
-        s.id.toLowerCase().includes(filterQuery.toLowerCase()) || 
-        s.name.toLowerCase().includes(filterQuery.toLowerCase())
-      );
+      const filtered = students.filter(s => {
+        const matchesSearch = s.id.toLowerCase().includes(filterQuery.toLowerCase()) || 
+                              s.name.toLowerCase().includes(filterQuery.toLowerCase());
+        const matchesGender = filterGender === '' || s.gender === filterGender;
+        const matchesGrade = filterGrade === '' || s.grade === filterGrade;
+        const matchesVillage = filterVillage === '' || s.village === filterVillage;
+        const matchesCommune = filterCommune === '' || s.commune === filterCommune;
+        const matchesDistrict = filterDistrict === '' || s.district === filterDistrict;
+        const matchesProvince = filterProvince === '' || s.province === filterProvince;
+        return matchesSearch && matchesGender && matchesGrade && matchesVillage && matchesCommune && matchesDistrict && matchesProvince;
+      });
 
       if (filtered.length === 0) {
         noDataMsg.classList.remove('hidden');
@@ -1842,7 +2019,7 @@
         const tr = document.createElement('tr');
         tr.className = 'border-b hover:bg-gray-50';
         
-        let photoCell = `<div class="w-12 h-16 bg-gray-200 border border-gray-300 overflow-hidden flex items-center justify-center relative rounded mx-auto">`;
+        let photoCell = `<div class="w-12 h-16 bg-transparent border-0 overflow-hidden flex items-center justify-center relative mx-auto">`;
         if (student.photo) {
           photoCell += `<img src="${student.photo}" class="w-full h-full object-cover">`;
         } else {
@@ -1851,27 +2028,29 @@
         photoCell += `</div>`;
 
         tr.innerHTML = `
-          <td class="px-2 py-3 text-center border border-gray-200">${photoCell}</td>
-          <td class="px-4 py-3 font-bold text-gray-900 border border-gray-200 whitespace-nowrap">${student.id}</td>
-          <td class="px-4 py-3 text-blue-700 font-semibold border border-gray-200 whitespace-nowrap">${student.name}</td>
-          <td class="px-4 py-3 border border-gray-200 whitespace-nowrap">${student.gender}</td>
-          <td class="px-4 py-3 font-semibold border border-gray-200 whitespace-nowrap">${student.grade}</td>
+          <td class="sticky-col-1 text-center border border-gray-200">${photoCell}</td>
+          <td class="sticky-col-2 font-bold text-gray-900 border border-gray-200">${student.id}</td>
+          <td class="sticky-col-3 text-blue-700 font-semibold border border-gray-200 whitespace-nowrap">${student.name}</td>
+          <td class="sticky-col-4 border border-gray-200 whitespace-nowrap">${student.gender}</td>
+          <td class="sticky-col-5 font-semibold border border-gray-200 whitespace-nowrap">${student.grade}</td>
           <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.dob}</td>
           <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.village || '-'}</td>
           <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.commune || '-'}</td>
           <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.district || '-'}</td>
           <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.province || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap" title="${student.father || ''}">${student.father || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap" title="${student.mother || ''}">${student.mother || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.fatherName || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.fatherJob || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.motherName || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.motherJob || '-'}</td>
           <td class="px-4 py-3 border border-gray-200 whitespace-nowrap">${student.phone || '-'}</td>
           <td class="px-4 py-3 text-center space-x-2 border border-gray-200 whitespace-nowrap">
-            <button onclick="openCardDownloadModal('${student.id}')" class="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded">
+            <button onclick="openCardDownloadModal('${student.id}')" class="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded font-semibold shadow">
               <i class="fa-solid fa-id-card"></i> មើល
             </button>
-            <button onclick="editStudent('${student.id}')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white text-xs rounded">
+            <button onclick="editStudent('${student.id}')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white text-xs rounded font-semibold shadow">
               <i class="fa-solid fa-pen-to-square"></i> កែប្រែ
             </button>
-            <button onclick="deleteStudent('${student.id}')" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-xs rounded">
+            <button onclick="deleteStudent('${student.id}')" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-xs rounded font-semibold shadow">
               <i class="fa-solid fa-trash"></i> លុប
             </button>
           </td>
@@ -1879,12 +2058,74 @@
         studentTableBody.appendChild(tr);
       });
 
-      // ធ្វើបច្ចុប្បន្នភាពទំហំ និងបង្ហាញរបារបញ្ជាអូសមើលទិន្នន័យ (Floating Scrollbar) ឡើងវិញ
       setTimeout(updateStickyScrollbar, 50);
     }
 
+    // ភ្ជាប់ព្រឹត្តិការណ៍ផ្លាស់ប្តូរការច្រោះ (Filter change listeners)
+    ['filter-admin-gender', 'filter-admin-grade', 'filter-admin-village', 'filter-admin-commune', 'filter-admin-district', 'filter-admin-province'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        renderAdminTable(adminSearchInput.value.trim());
+      });
+    });
+
     adminSearchInput.addEventListener('input', (e) => {
       renderAdminTable(e.target.value.trim());
+    });
+
+    // ភ្ជាប់ព្រឹត្តិការណ៍ Drag & Drop សម្រាប់ Photo upload zone
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleUploadedPhotoFile(file);
+      }
+    });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      photoDropzone.addEventListener(eventName, (e) => e.preventDefault(), false);
+    });
+
+    photoDropzone.addEventListener('dragover', () => {
+      photoDropzone.classList.add('border-blue-500', 'bg-blue-50/50');
+    });
+
+    photoDropzone.addEventListener('dragleave', () => {
+      photoDropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
+    });
+
+    photoDropzone.addEventListener('drop', (e) => {
+      photoDropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleUploadedPhotoFile(file);
+      }
+    });
+
+    function handleUploadedPhotoFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        activeEditStudentPhoto = event.target.result;
+        showPhotoPreview(activeEditStudentPhoto);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function showPhotoPreview(base64Data) {
+      if (base64Data) {
+        photoUploadPreview.src = base64Data;
+        photoUploadPreviewContainer.classList.remove('hidden');
+        photoUploadPlaceholder.classList.add('hidden');
+      } else {
+        photoUploadPreview.src = '';
+        photoUploadPreviewContainer.classList.add('hidden');
+        photoUploadPlaceholder.classList.remove('hidden');
+      }
+    }
+
+    btnRemovePhoto.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activeEditStudentPhoto = "";
+      photoInput.value = "";
+      showPhotoPreview(null);
     });
 
     window.editStudent = function(id) {
@@ -1909,11 +2150,15 @@
       document.getElementById('input-commune').value = student.commune || '';
       document.getElementById('input-district').value = student.district || '';
       document.getElementById('input-province').value = student.province || '';
-      document.getElementById('input-father').value = student.father || '';
-      document.getElementById('input-mother').value = student.mother || '';
+      
+      document.getElementById('input-father-name').value = student.fatherName || '';
+      document.getElementById('input-father-job').value = student.fatherJob || '';
+      document.getElementById('input-mother-name').value = student.motherName || '';
+      document.getElementById('input-mother-job').value = student.motherJob || '';
       document.getElementById('input-phone').value = student.phone || '';
 
       activeEditStudentPhoto = student.photo || '';
+      showPhotoPreview(activeEditStudentPhoto);
     };
 
     function resetStudentForm() {
@@ -1924,6 +2169,7 @@
       isEditMode = false;
       activeEditStudentId = null;
       activeEditStudentPhoto = "";
+      showPhotoPreview(null);
     }
 
     window.deleteStudent = function(id) {
@@ -2020,6 +2266,7 @@
     btnClosePdfModal.addEventListener('click', () => pdfDownloadModal.classList.add('hidden'));
     btnCancelPdf.addEventListener('click', () => pdfDownloadModal.classList.add('hidden'));
 
+    // ដោះស្រាយបញ្ហាទីតាំង Fields រំកិលមិនដូចការកំណត់ប្លង់ក្នុង Designer (Sync scale, scroll and coordinates)
     btnGeneratePdf.addEventListener('click', async () => {
       btnGeneratePdf.disabled = true;
       const scope = document.querySelector('input[name="pdf-scope"]:checked').value;
@@ -2067,10 +2314,17 @@
 
         await new Promise(resolve => setTimeout(resolve, 250));
 
+        // កំណត់ទម្រង់កូអរដោនេរូបភាពឱ្យនៅទ្រឹង ជៀសវាងការរំកិល (Offset Bug Fix)
         const canvas = await html2canvas(tempCard, {
           scale: 4,
           useCORS: true,
-          allowTaint: true
+          allowTaint: true,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 375,
+          windowHeight: 500,
+          x: 0,
+          y: 0
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -2138,8 +2392,10 @@
         { header: 'ឃុំ/សង្កាត់', key: 'commune', width: 18 },
         { header: 'ស្រុក/ខណ្ឌ', key: 'district', width: 18 },
         { header: 'ខេត្ត/ក្រុង', key: 'province', width: 18 },
-        { header: 'ឈ្មោះឪពុក និងមុខរបរ', key: 'father', width: 28 },
-        { header: 'ឈ្មោះម្តាយ និងមុខរបរ', key: 'mother', width: 28 },
+        { header: 'ឈ្មោះឪពុក', key: 'fatherName', width: 22 },
+        { header: 'មុខរបរឪពុក', key: 'fatherJob', width: 20 },
+        { header: 'ឈ្មោះម្ដាយ', key: 'motherName', width: 22 },
+        { header: 'មុខរបរម្ដាយ', key: 'motherJob', width: 20 },
         { header: 'លេខទូរស័ព្ទអាណាព្យាបាល', key: 'phone', width: 24 }
       ];
 
@@ -2169,8 +2425,10 @@
           commune: student.commune || '',
           district: student.district || '',
           province: student.province || '',
-          father: student.father || '',
-          mother: student.mother || '',
+          fatherName: student.fatherName || '',
+          fatherJob: student.fatherJob || '',
+          motherName: student.motherName || '',
+          motherJob: student.motherJob || '',
           phone: student.phone || ''
         });
 
@@ -2270,28 +2528,37 @@
       const district = document.getElementById('input-district').value.trim();
       const province = document.getElementById('input-province').value.trim();
 
-      const father = document.getElementById('input-father').value.trim();
-      const mother = document.getElementById('input-mother').value.trim();
+      const fatherName = document.getElementById('input-father-name').value.trim();
+      const fatherJob = document.getElementById('input-father-job').value.trim();
+      const motherName = document.getElementById('input-mother-name').value.trim();
+      const motherJob = document.getElementById('input-mother-job').value.trim();
       const phone = document.getElementById('input-phone').value.trim();
-      const photoFile = document.getElementById('input-photo').files[0];
 
       if (!isEditMode && students.some(s => s.id === id)) {
         alert('អត្តលេខនេះមានរួចហើយនៅក្នុងប្រព័ន្ធ!');
         return;
       }
 
-      const studentData = { id, name, gender, dob, grade, village, commune, district, province, father, mother, phone, photo: isEditMode ? activeEditStudentPhoto : "" };
+      // រក្សាទុករូបថតបច្ចុប្បន្នដែលបានជ្រើសរើស ឬរក្សាទុករូបថតចាស់
+      const studentData = { 
+        id, 
+        name, 
+        gender, 
+        dob, 
+        grade, 
+        village, 
+        commune, 
+        district, 
+        province, 
+        fatherName, 
+        fatherJob, 
+        motherName, 
+        motherJob, 
+        phone, 
+        photo: activeEditStudentPhoto 
+      };
 
-      if (photoFile) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          studentData.photo = event.target.result; 
-          saveStudent(studentData);
-        };
-        reader.readAsDataURL(photoFile);
-      } else {
-        saveStudent(studentData);
-      }
+      saveStudent(studentData);
     });
 
     function saveStudent(studentData) {
@@ -2339,8 +2606,10 @@
             const district = row['ស្រុក_ខណ្ឌ'] || row['ស្រុក'] || row['District'] || row['district'] || "";
             const province = row['ខេត្ត_ក្រុង'] || row['ខេត្ត'] || row['Province'] || row['province'] || "";
 
-            const father = row['ឈ្មោះឪពុក និងមុខរបរ'] || row['ឈ្មោះឪពុក'] || "";
-            const mother = row['ឈ្មោះម្តាយ និងមុខរបរ'] || row['ឈ្មោះម្តាយ'] || "";
+            const fatherName = row['ឈ្មោះឪពុក'] || row['ឈ្មោះឪពុក និងមុខរបរ'] || "";
+            const fatherJob = row['មុខរបរឪពុក'] || "";
+            const motherName = row['ឈ្មោះម្ដាយ'] || row['ឈ្មោះម្តាយ និងមុខរបរ'] || "";
+            const motherJob = row['មុខរបរម្ដាយ'] || "";
             const phone = row['លេខទូរស័ព្ទអាណាព្យាបាល'] || row['Phone'] || row['phone'] || "";
 
             if (id && name) {
@@ -2355,8 +2624,10 @@
                   commune: commune.trim(),
                   district: district.trim(),
                   province: province.trim(),
-                  father: father.trim(),
-                  mother: mother.trim(),
+                  fatherName: fatherName.trim(),
+                  fatherJob: fatherJob.trim(),
+                  motherName: motherName.trim(),
+                  motherJob: motherJob.trim(),
                   phone: phone.trim(),
                   photo: "" 
                 });
@@ -2380,8 +2651,8 @@
     }
 
     document.getElementById('btn-download-template').addEventListener('click', () => {
-      const headers = ['អត្តលេខ', 'គោត្តនាម-នាម', 'ភេទ', 'ថ្ងៃខែឆ្នាំកំណើត', 'ថ្នាក់ទី', 'ភូមិ', 'ឃុំ_សង្កាត់', 'ស្រុក_ខណ្ឌ', 'ខេត្ត_ក្រុង', 'ឈ្មោះឪពុក និងមុខរបរ', 'ឈ្មោះម្តាយ និងមុខរបរ', 'លេខទូរស័ព្ទអាណាព្យាបាល'];
-      const sampleRow = ['002', 'ជា សុជាតិ', 'ប្រុស', '០១-កុម្ភៈ-២០០៨', '១២B', 'ភូមិ១', 'ឃុំក', 'ស្រុកខ', 'ខេត្តគ', 'ជា សុខ (កសិករ)', 'កែវ ស៊ីណា (មេផ្ទះ)', '012345678'];
+      const headers = ['អត្តលេខ', 'គោត្តនាម-នាម', 'ភេទ', 'ថ្ងៃខែឆ្នាំកំណើត', 'ថ្នាក់ទី', 'ភូមិ', 'ឃុំ_សង្កាត់', 'ស្រុក_ខណ្ឌ', 'ខេត្ត_ក្រុង', 'ឈ្មោះឪពុក', 'មុខរបរឪពុក', 'ឈ្មោះម្ដាយ', 'មុខរបរម្ដាយ', 'លេខទូរស័ព្ទអាណាព្យាបាល'];
+      const sampleRow = ['002', 'ជា សុជាតិ', 'ប្រុស', '០១-កុម្ភៈ-២០០៨', '១២B', 'ភូមិ១', 'ឃុំក', 'ស្រុកខ', 'ខេត្តគ', 'ជា សុខ', 'កសិករ', 'កែវ ស៊ីណា', 'មេផ្ទះ', '012345678'];
       
       let csvContent = "\ufeff"; 
       csvContent += headers.join(",") + "\n";
