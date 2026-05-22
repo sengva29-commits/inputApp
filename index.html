@@ -13,6 +13,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+  <!-- jsPDF Library សម្រាប់ទាញយកជា PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
   <!-- Google Fonts សម្រាប់អក្សរខ្មែរ -->
   <style>
@@ -214,6 +216,16 @@
           <button id="btn-toggle-designer" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm rounded transition font-semibold shadow">
             <i class="fa-solid fa-crop-simple mr-1"></i> រៀបចំប្លង់កាតសិស្ស
           </button>
+
+          <!-- ប៊ូតុងកំណត់ Watermark -->
+          <button id="btn-toggle-watermark" class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white text-sm rounded transition font-semibold shadow">
+            <i class="fa-solid fa-stamp mr-1"></i> កំណត់ Watermark
+          </button>
+
+          <!-- ប៊ូតុងរក្សាទុកកាតសិស្សជា PDF -->
+          <button id="btn-open-pdf-modal" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white text-sm rounded transition font-semibold shadow">
+            <i class="fa-solid fa-file-pdf mr-1"></i> រក្សាទុកកាតសិស្ស (PDF)
+          </button>
           
           <!-- ប៊ូតុងទាញយកជា Excel XLSX -->
           <button id="btn-export-excel" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-sm rounded transition font-semibold shadow">
@@ -306,6 +318,96 @@
         </div>
       </div>
 
+      <!-- ផ្នែកកំណត់ Watermark (Watermark Settings Panel) -->
+      <div id="watermark-settings-section" class="hidden bg-white p-6 rounded-lg shadow-md border-t-4 border-cyan-600 space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b">
+          <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-stamp mr-2 text-cyan-600"></i>កំណត់ Watermark លើកាតសិស្សនៅទំព័រដើម</h3>
+          <button id="btn-close-watermark" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <p class="text-xs text-gray-500">បញ្ចូលអក្សរ Watermark និងប្រើប្រាស់របារទាញខាងក្រោមដើម្បីកំណត់ទំហំ ពណ៌ មុំ និងភាពច្បាស់នៃអក្សរ Watermark នៅលើកាតសិស្សនៅទំព័រដើម។</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1">អក្សរ Watermark</label>
+              <input type="text" id="input-watermark-text" placeholder="ឧ. ថតចម្លង / COPY" class="w-full px-3 py-1.5 border rounded text-sm">
+            </div>
+            
+            <!-- Slider for Font Size -->
+            <div>
+              <div class="flex justify-between text-xs text-gray-600 mb-1">
+                <span>ទំហំអក្សរ:</span>
+                <span id="lbl-wm-size" class="font-bold">28px</span>
+              </div>
+              <input type="range" id="slider-wm-size" min="10" max="100" value="28" class="w-full accent-cyan-600">
+            </div>
+
+            <!-- Slider for Opacity / Clarity -->
+            <div>
+              <div class="flex justify-between text-xs text-gray-600 mb-1">
+                <span>ភាពច្បាស់ (Opacity):</span>
+                <span id="lbl-wm-opacity" class="font-bold">20%</span>
+              </div>
+              <input type="range" id="slider-wm-opacity" min="0" max="100" value="20" class="w-full accent-cyan-600">
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Slider for Rotation Angle -->
+            <div>
+              <div class="flex justify-between text-xs text-gray-600 mb-1">
+                <span>មុំអក្សរ (Rotation Angle):</span>
+                <span id="lbl-wm-angle" class="font-bold">-45°</span>
+              </div>
+              <input type="range" id="slider-wm-angle" min="-180" max="180" value="-45" class="w-full accent-cyan-600">
+            </div>
+
+            <!-- Sliders for Color (Red, Green, Blue) -->
+            <div class="space-y-2 border p-3 rounded bg-gray-50">
+              <span class="block text-xs font-bold text-gray-700"><i class="fa-solid fa-palette mr-1 text-cyan-600"></i>ប្ដូរពណ៌អក្សរ (RGB Sliders)</span>
+              
+              <div>
+                <div class="flex justify-between text-[11px] text-gray-600">
+                  <span>ពណ៌ក្រហម (R):</span>
+                  <span id="lbl-wm-r" class="font-bold">107</span>
+                </div>
+                <input type="range" id="slider-wm-r" min="0" max="255" value="107" class="w-full accent-red-600">
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] text-gray-600">
+                  <span>ពណ៌បៃតង (G):</span>
+                  <span id="lbl-wm-g" class="font-bold">114</span>
+                </div>
+                <input type="range" id="slider-wm-g" min="0" max="255" value="114" class="w-full accent-green-600">
+              </div>
+
+              <div>
+                <div class="flex justify-between text-[11px] text-gray-600">
+                  <span>ពណ៌ខៀវ (B):</span>
+                  <span id="lbl-wm-b" class="font-bold">128</span>
+                </div>
+                <input type="range" id="slider-wm-b" min="0" max="255" value="128" class="w-full accent-blue-600">
+              </div>
+
+              <!-- Color Preview Box -->
+              <div class="flex items-center space-x-2 mt-2">
+                <span class="text-[10px] text-gray-500">គំរូពណ៌៖</span>
+                <div id="wm-color-preview" class="w-6 h-6 rounded border shadow-sm" style="background-color: rgb(107, 114, 128);"></div>
+                <span id="lbl-wm-rgb-preview" class="text-[10px] font-mono text-gray-600">rgb(107, 114, 128)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end space-x-2 border-t pt-3">
+          <button id="btn-cancel-watermark" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300">បោះបង់</button>
+          <button id="btn-save-watermark" class="px-4 py-2 bg-cyan-600 text-white text-sm rounded hover:bg-cyan-500 font-semibold transition">
+            រក្សាទុក Watermark
+          </button>
+        </div>
+      </div>
+
       <!-- ផ្នែករៀបចំប្លង់កាតសិស្ស (Layout Designer Panel) -->
       <div id="designer-container-section" class="hidden bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500 transition-all duration-300">
         <div class="flex justify-between items-center mb-4 pb-2 border-b">
@@ -384,7 +486,16 @@
               </div>
             </div>
 
-            <!-- ៤. ប៊ូតុងបញ្ជាប្លង់ -->
+            <!-- ៤. កំណត់ឆ្នាំសិក្សាបង្ហាញលើកាតសិស្ស -->
+            <div class="bg-gray-50 p-4 rounded border space-y-3">
+              <label class="block text-xs font-bold text-gray-700"><i class="fa-solid fa-calendar-days mr-1"></i> ៤. ប្ដូរឆ្នាំសិក្សា</label>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-600 mb-1">ឆ្នាំសិក្សាបង្ហាញលើកាតសិស្ស</label>
+                <input type="text" id="input-layout-academic-year" placeholder="ឧ. 2025-2026" class="w-full px-3 py-1 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+              </div>
+            </div>
+
+            <!-- ៥. ប៊ូតុងបញ្ជាប្លង់ -->
             <div class="bg-gray-50 p-4 rounded border space-y-2">
               <button id="btn-save-layout" class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded text-sm transition shadow">
                 <i class="fa-solid fa-floppy-disk mr-1"></i> រក្សាទុកប្លង់កាត
@@ -395,10 +506,10 @@
             </div>
           </div>
 
-          <!-- ផ្ទាំងការងាររៀបចំប្លង់ -->
+          <!-- ផ្ទាំងការងាររៀបចំប្លង់ (លុប Border ចេញ) -->
           <div class="lg:col-span-7 flex justify-center items-center bg-gray-200 py-6 rounded-lg border-2 border-dashed border-gray-300">
             <div class="relative bg-white p-3 rounded-lg shadow-md">
-              <div id="designer-card-render" class="student-card-size bg-white border border-gray-400 relative overflow-hidden">
+              <div id="designer-card-render" class="student-card-size bg-white relative overflow-hidden">
                 <!-- ប្លង់ និងធាតុបង្កើតដោយ JS -->
               </div>
             </div>
@@ -493,52 +604,62 @@
       </div>
 
       <!-- តារាងគ្រប់គ្រងទិន្នន័យសិស្ស (បង្ហាញព័ត៌មានលម្អិតទាំងអស់ បំបែក ភូមិ ឃុំ ស្រុក ខេត្ត) -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="bg-white p-6 rounded-lg shadow-md relative">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-          <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-users mr-2 text-blue-800"></i>បញ្ជីឈ្មោះសិស្សក្នុងប្រព័ន្ធ</h3>
+          <h3 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-users mr-2 text-blue-800"></i>បញ្ជីរាយនាមសិស្សក្នុងប្រព័ន្ធ</h3>
           <input type="text" id="admin-search-input" placeholder="ស្វែងរកតាមអត្តលេខ ឬឈ្មោះ..." class="px-3 py-1 border rounded text-sm focus:outline-none w-full md:w-64">
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- ផ្នែករបាយការណ៍សង្ខេបទិន្នន័យសិស្ស -->
+        <div id="student-report-summary" class="space-y-4 mb-6">
+          <!-- ទិន្នន័យបង្កើតដោយ JS -->
+        </div>
+
+        <div class="overflow-x-auto" id="table-scroll-wrapper">
           <table class="min-w-full text-sm text-left text-gray-500 border-collapse border border-gray-200">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 font-bold">
               <tr>
                 <th class="px-4 py-3 border border-gray-200">រូបថត</th>
-                <th class="px-4 py-3 border border-gray-200">អត្តលេខ</th>
-                <th class="px-4 py-3 border border-gray-200">ឈ្មោះសិស្ស</th>
-                <th class="px-4 py-3 border border-gray-200">ភេទ</th>
-                <th class="px-4 py-3 border border-gray-200">ថ្នាក់</th>
-                <th class="px-4 py-3 border border-gray-200">ថ្ងៃខែឆ្នាំកំណើត</th>
-                <th class="px-4 py-3 border border-gray-200">ភូមិ</th>
-                <th class="px-4 py-3 border border-gray-200">ឃុំ/សង្កាត់</th>
-                <th class="px-4 py-3 border border-gray-200">ស្រុក/ខណ្ឌ</th>
-                <th class="px-4 py-3 border border-gray-200">ខេត្ត/ក្រុង</th>
-                <th class="px-4 py-3 border border-gray-200">ព័ត៌មានឪពុក</th>
-                <th class="px-4 py-3 border border-gray-200">ព័ត៌មានម្តាយ</th>
-                <th class="px-4 py-3 border border-gray-200">លេខទូរស័ព្ទអាណាព្យាបាល</th>
-                <th class="px-4 py-3 text-center border border-gray-200">សកម្មភាព</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">អត្តលេខ</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ឈ្មោះសិស្ស</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ភេទ</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ថ្នាក់</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ថ្ងៃខែឆ្នាំកំណើត</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ភូមិ</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ឃុំ/សង្កាត់</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ស្រុក/ខណ្ឌ</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ខេត្ត/ក្រុង</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ព័ត៌មានឪពុក</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">ព័ត៌មានម្តាយ</th>
+                <th class="px-4 py-3 border border-gray-200 whitespace-nowrap">លេខទូរស័ព្ទអាណាព្យាបាល</th>
+                <th class="px-4 py-3 text-center border border-gray-200 whitespace-nowrap">សកម្មភាព</th>
               </tr>
             </thead>
             <tbody id="student-table-body" class="divide-y divide-gray-200">
               <!-- ទិន្នន័យបញ្ចូលដោយ JS -->
             </tbody>
           </table>
-          <div id="no-data-msg" class="text-center py-6 text-gray-400 hidden">មិនទាន់មានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធនៅឡើយទេ</div>
+        </div>
+        <div id="no-data-msg" class="text-center py-6 text-gray-400 hidden">មិនទាន់មានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធនៅឡើយទេ</div>
+
+        <!-- Sticky Floating scrollbar for easily sliding left & right anywhere on viewport -->
+        <div id="sticky-scroll-wrapper" class="sticky bottom-0 left-0 right-0 overflow-x-auto bg-gray-50/90 backdrop-blur-sm z-40 border-t border-gray-200" style="height: 14px; display: none;">
+          <div id="sticky-scroll-content" style="height: 1px;"></div>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Modal សម្រាប់ទាញយកកាតសិស្ស (Download Modal) -->
+  <!-- Modal សម្រាប់ទាញយកកាតសិស្ស (Download Modal - ប្ដូរពាក្យក្នុង Modal តាមការណែនាំ និងលុប Border ចេញ) -->
   <div id="admin-card-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
     <div class="bg-white p-6 rounded-lg max-w-xl w-full flex flex-col items-center my-8">
       <div class="flex justify-between items-center w-full mb-4 border-b pb-2">
-        <h3 class="font-bold text-gray-800 text-lg">កាតសម្គាល់ខ្លួនសិស្ស (ច្បាប់ទាញយក)</h3>
+        <h3 class="font-bold text-gray-800 text-lg">កាតសម្គាល់ខ្លួនសិស្ស (ទាញយកកាតនេះ)</h3>
         <button id="btn-close-modal" class="text-gray-500 hover:text-gray-800 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
       
-      <div id="admin-card-container" class="border border-gray-300 shadow-md p-2 bg-white rounded">
+      <div id="admin-card-container" class="bg-white">
         <!-- ចម្លងប្លង់ចុងក្រោយពី JS -->
       </div>
 
@@ -551,6 +672,63 @@
     </div>
   </div>
 
+  <!-- Modal សម្រាប់ទាញយកកាតសិស្សជា PDF (PDF Generation Modal) -->
+  <div id="pdf-download-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+    <div class="bg-white p-6 rounded-lg max-w-md w-full flex flex-col my-8 shadow-2xl">
+      <div class="flex justify-between items-center w-full mb-4 border-b pb-2">
+        <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-file-pdf text-rose-600 mr-2"></i>រក្សាទុកកាតសិស្សជា PDF</h3>
+        <button id="btn-close-pdf-modal" class="text-gray-500 hover:text-gray-800 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <div class="space-y-4 font-battambang">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-2">ជម្រើសទាញយកកាតសិស្ស</label>
+          <div class="space-y-2">
+            <label class="flex items-center space-x-2 text-sm cursor-pointer">
+              <input type="radio" name="pdf-scope" value="all" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+              <span id="lbl-pdf-all-text" class="text-gray-800 font-semibold">ទាញយកកាតសិស្សទាំងអស់</span>
+            </label>
+            <label class="flex items-center space-x-2 text-sm cursor-pointer">
+              <input type="radio" name="pdf-scope" value="class" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+              <span class="text-gray-800 font-semibold">ទាញយកតាមថ្នាក់រៀន</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- កន្លែងជ្រើសរើសថ្នាក់ -->
+        <div id="pdf-class-select-container" class="hidden pl-6">
+          <label class="block text-xs font-semibold text-gray-600 mb-1">សូមជ្រើសរើសថ្នាក់រៀន</label>
+          <select id="select-pdf-class" class="w-full px-3 py-1.5 border rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <!-- បំពេញដោយ JS -->
+          </select>
+        </div>
+
+        <!-- របារបង្ហាញវឌ្ឍនភាព (Progress Bar) -->
+        <div id="pdf-progress-container" class="hidden space-y-2 bg-gray-50 p-3 rounded border border-gray-100">
+          <div class="flex justify-between text-xs font-semibold text-gray-600">
+            <span id="lbl-pdf-progress-status">កំពុងដំណើរការ...</span>
+            <span id="lbl-pdf-progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div id="bar-pdf-progress" class="bg-rose-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-3 w-full border-t pt-3">
+        <button id="btn-cancel-pdf" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition text-sm">បោះបង់</button>
+        <button id="btn-generate-pdf" class="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-white rounded transition text-sm font-semibold shadow">
+          <i class="fa-solid fa-download mr-1"></i> ចាប់ផ្តើមបង្កើត PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temporary Card Container for Rendering Hidden Cards (for PDF generation) - លុប Border ចេញ -->
+  <div id="temp-pdf-render-container" class="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none" style="width: 375px; height: 500px; overflow: hidden;">
+    <div id="temp-pdf-card" class="student-card-size bg-white relative overflow-hidden"></div>
+  </div>
+
   <!-- JavaScript គ្រប់គ្រងកម្មវិធី -->
   <script>
     // ១. កំណត់ប្លង់លំនាំដើម (Default Layout Coordinates) គិតជា pixel ធៀបនឹងទំហំកាត 375px x 500px
@@ -560,6 +738,7 @@
       bgSizeHeight: "100", // គិតជា %
       bgPositionX: "0",    // គិតជា px
       bgPositionY: "0",    // គិតជា px
+      academicYear: "2025-2026", // កំណត់ឆ្នាំសិក្សាលំនាំដើម
       photo: { left: "25px", top: "115px", width: "120px", height: "160px" },
       id: { left: "165px", top: "115px", fontSize: "14" },
       name: { left: "165px", top: "150px", fontSize: "14" },
@@ -624,6 +803,30 @@
     const btnCancelAccountChange = document.getElementById('btn-cancel-account-change');
     const btnSaveAccountChange = document.getElementById('btn-save-account-change');
 
+    // Watermark Configuration Controls
+    const btnToggleWatermark = document.getElementById('btn-toggle-watermark');
+    const watermarkSettingsSection = document.getElementById('watermark-settings-section');
+    const btnCloseWatermark = document.getElementById('btn-close-watermark');
+    const btnCancelWatermark = document.getElementById('btn-cancel-watermark');
+    const btnSaveWatermark = document.getElementById('btn-save-watermark');
+    const inputWatermarkText = document.getElementById('input-watermark-text');
+    
+    const sliderWmSize = document.getElementById('slider-wm-size');
+    const sliderWmOpacity = document.getElementById('slider-wm-opacity');
+    const sliderWmAngle = document.getElementById('slider-wm-angle');
+    const sliderWmR = document.getElementById('slider-wm-r');
+    const sliderWmG = document.getElementById('slider-wm-g');
+    const sliderWmB = document.getElementById('slider-wm-b');
+
+    const lblWmSize = document.getElementById('lbl-wm-size');
+    const lblWmOpacity = document.getElementById('lbl-wm-opacity');
+    const lblWmAngle = document.getElementById('lbl-wm-angle');
+    const lblWmR = document.getElementById('lbl-wm-r');
+    const lblWmG = document.getElementById('lbl-wm-g');
+    const lblWmB = document.getElementById('lbl-wm-b');
+    const wmColorPreview = document.getElementById('wm-color-preview');
+    const lblWmRgbPreview = document.getElementById('lbl-wm-rgb-preview');
+
     // ប៊ូតុងលុបសិស្សទាំងអស់ ពណ៌ក្រហម
     const btnDeleteAllStudents = document.getElementById('btn-delete-all-students');
 
@@ -683,6 +886,16 @@
     const btnDownloadCardImage = document.getElementById('btn-download-card-image');
     let activeDownloadStudentId = null;
 
+    // PDF Elements
+    const btnOpenPdfModal = document.getElementById('btn-open-pdf-modal');
+    const pdfDownloadModal = document.getElementById('pdf-download-modal');
+    const btnClosePdfModal = document.getElementById('btn-close-pdf-modal');
+    const btnCancelPdf = document.getElementById('btn-cancel-pdf');
+    const pdfScopeRadios = document.getElementsByName('pdf-scope');
+    const pdfClassSelectContainer = document.getElementById('pdf-class-select-container');
+    const selectPdfClass = document.getElementById('select-pdf-class');
+    const btnGeneratePdf = document.getElementById('btn-generate-pdf');
+
     // Tracking selected fields in Layout Designer
     let selectedFieldIds = [];
 
@@ -740,13 +953,13 @@
       }
     }
 
-    // ២. បង្កើតរចនាសម្ព័ន្ធ Elements នៅក្នុងកាតសិស្ស
+    // ២. បង្កើតរចនាសម្ព័ន្ធ Elements នៅក្នុងកាតសិស្ស (កំណត់ Photo Background ជា Transparent និងដាក់ឆ្នាំសិក្សាដែលអាចកែប្រែបាន)
     function buildCardDOM(container, isDesignMode = false) {
       container.innerHTML = '';
       
       const elements = [
         { id: 'photo', html: `
-          <div class="w-full h-full bg-blue-700 border border-gray-300 overflow-hidden flex items-center justify-center relative">
+          <div class="w-full h-full bg-transparent border border-gray-300 overflow-hidden flex items-center justify-center relative">
             <img id="card-photo" src="" alt="Student Photo" class="w-full h-full object-cover hidden">
             <div id="card-photo-placeholder" class="text-white text-center flex flex-col items-center">
               <i class="fa-solid fa-user text-3xl"></i>
@@ -760,7 +973,7 @@
         { id: 'nationality', html: `សញ្ជាតិ: <span class="text-blue-700 ml-1">ខ្មែរ</span>`, style: `font-size: ${savedLayout.nationality.fontSize || 14}px; line-height: 1.2;` },
         { id: 'dob', html: `ថ្ងៃខែឆ្នាំកំណើត: <span id="card-dob" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.dob.fontSize || 13}px; line-height: 1.2;` },
         { id: 'grade', html: `ថ្នាក់ទី: <span id="card-grade" class="text-blue-700 ml-1"></span>`, style: `font-size: ${savedLayout.grade.fontSize || 14}px; line-height: 1.2;` },
-        { id: 'year', html: `ឆ្នាំសិក្សា: <span id="card-year" class="text-blue-700 ml-1">2025-2026</span>`, style: `font-size: ${savedLayout.year.fontSize || 14}px; line-height: 1.2;` }
+        { id: 'year', html: `ឆ្នាំសិក្សា: <span id="card-year" class="text-blue-700 ml-1">${savedLayout.academicYear || '2025-2026'}</span>`, style: `font-size: ${savedLayout.year.fontSize || 14}px; line-height: 1.2;` }
       ];
 
       // អនុវត្តទំហំ និងទីតាំងរូបភាពផ្ទៃក្រោយ
@@ -781,17 +994,161 @@
           enableSelection(div, el.id);
         }
       });
+
+      // បន្ថែម Watermark នៅពេលបង្ហាញកាតនៅលើទំព័រដើម (Public Card render)
+      if (container.id === 'public-card-render') {
+        const wmText = localStorage.getItem('watermark_text') || '';
+        const wmSize = localStorage.getItem('watermark_size') || '28';
+        const wmOpacity = localStorage.getItem('watermark_opacity') || '20';
+        const wmAngle = localStorage.getItem('watermark_angle') || '-45';
+        const wmR = localStorage.getItem('watermark_color_r') || '107';
+        const wmG = localStorage.getItem('watermark_color_g') || '114';
+        const wmB = localStorage.getItem('watermark_color_b') || '128';
+
+        if (wmText) {
+          const wmDiv = document.createElement('div');
+          wmDiv.id = "card-watermark-overlay";
+          wmDiv.className = "absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden font-moul";
+          wmDiv.style.transform = `rotate(${wmAngle}deg)`;
+          wmDiv.style.fontSize = `${wmSize}px`;
+          wmDiv.style.color = `rgba(${wmR}, ${wmG}, ${wmB}, ${wmOpacity / 100})`;
+          wmDiv.style.whiteSpace = "nowrap";
+          wmDiv.style.zIndex = "49"; // លើសពីកម្រិត z-10 របស់រូបថត
+          wmDiv.textContent = wmText;
+          container.appendChild(wmDiv);
+        }
+      }
     }
 
-    // អនុវត្តស្ទីល Background
+    // មុខងារបង្ហាញគំរូ Watermark ភ្លាមៗ (Real-time Preview)
+    function applyWatermarkPreview() {
+      const text = inputWatermarkText.value.trim();
+      const size = sliderWmSize.value;
+      const opacity = sliderWmOpacity.value;
+      const angle = sliderWmAngle.value;
+      const r = sliderWmR.value;
+      const g = sliderWmG.value;
+      const b = sliderWmB.value;
+
+      const container = document.getElementById('public-card-render');
+      if (container) {
+        let wmDiv = container.querySelector('#card-watermark-overlay');
+        if (text) {
+          if (!wmDiv) {
+            wmDiv = document.createElement('div');
+            wmDiv.id = "card-watermark-overlay";
+            wmDiv.className = "absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden font-moul";
+            container.appendChild(wmDiv);
+          }
+          wmDiv.style.cssText = `
+            position: absolute;
+            inset: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            user-select: none;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 49;
+            transform: rotate(${angle}deg);
+            font-size: ${size}px;
+            color: rgba(${r}, ${g}, ${b}, ${opacity / 100});
+          `;
+          wmDiv.textContent = text;
+        } else {
+          if (wmDiv) wmDiv.remove();
+        }
+      }
+    }
+
+    // ត្រឡប់ការបង្ហាញ Watermark គំរូទៅរកស្ថានភាពដែលបានរក្សាទុកចុងក្រោយ
+    function rollbackWatermarkPreview() {
+      const text = localStorage.getItem('watermark_text') || '';
+      const size = localStorage.getItem('watermark_size') || '28';
+      const opacity = localStorage.getItem('watermark_opacity') || '20';
+      const angle = localStorage.getItem('watermark_angle') || '-45';
+      const r = localStorage.getItem('watermark_color_r') || '107';
+      const g = localStorage.getItem('watermark_color_g') || '114';
+      const b = localStorage.getItem('watermark_color_b') || '128';
+
+      const container = document.getElementById('public-card-render');
+      if (container) {
+        let wmDiv = container.querySelector('#card-watermark-overlay');
+        if (text) {
+          if (!wmDiv) {
+            wmDiv = document.createElement('div');
+            wmDiv.id = "card-watermark-overlay";
+            wmDiv.className = "absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden font-moul";
+            container.appendChild(wmDiv);
+          }
+          wmDiv.style.cssText = `
+            position: absolute;
+            inset: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            user-select: none;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 49;
+            transform: rotate(${angle}deg);
+            font-size: ${size}px;
+            color: rgba(${r}, ${g}, ${b}, ${opacity / 100});
+          `;
+          wmDiv.textContent = text;
+        } else {
+          if (wmDiv) wmDiv.remove();
+        }
+      }
+    }
+
+    // អនុវត្តស្ទីល Background (ផ្ទេរពី CSS background-image ទៅជា HTML <img> លើកលែងតែទំព័រដើម ដើម្បីរូបភាពច្បាស់ដើម 100%)
     function applyBgStyles(container) {
-      if (savedLayout.bgImage) {
-        container.style.backgroundImage = `url("${savedLayout.bgImage}")`;
-        container.style.backgroundSize = `${savedLayout.bgSizeWidth || 100}% ${savedLayout.bgSizeHeight || 100}%`;
-        container.style.backgroundPosition = `${savedLayout.bgPositionX || 0}px ${savedLayout.bgPositionY || 0}px`;
+      if (container.id === 'public-card-render') {
+        const existingBgImg = container.querySelector('.card-bg-img');
+        if (existingBgImg) {
+          existingBgImg.remove();
+        }
+        if (savedLayout.bgImage) {
+          container.style.backgroundImage = `url("${savedLayout.bgImage}")`;
+          container.style.backgroundSize = `${savedLayout.bgSizeWidth || 100}% ${savedLayout.bgSizeHeight || 100}%`;
+          container.style.backgroundPosition = `${savedLayout.bgPositionX || 0}px ${savedLayout.bgPositionY || 0}px`;
+        } else {
+          container.style.backgroundImage = 'none';
+          container.style.backgroundColor = '#ffffff';
+        }
       } else {
         container.style.backgroundImage = 'none';
         container.style.backgroundColor = '#ffffff';
+
+        if (savedLayout.bgImage) {
+          let bgImg = container.querySelector('.card-bg-img');
+          if (!bgImg) {
+            bgImg = document.createElement('img');
+            bgImg.className = 'card-bg-img absolute top-0 left-0 pointer-events-none select-none';
+            bgImg.style.zIndex = '0';
+            bgImg.style.maxWidth = 'none';
+            bgImg.style.maxHeight = 'none';
+            if (container.firstChild) {
+              container.insertBefore(bgImg, container.firstChild);
+            } else {
+              container.appendChild(bgImg);
+            }
+          }
+          if (bgImg.src !== savedLayout.bgImage) {
+            bgImg.src = savedLayout.bgImage;
+          }
+          bgImg.style.width = `${savedLayout.bgSizeWidth || 100}%`;
+          bgImg.style.height = `${savedLayout.bgSizeHeight || 100}%`;
+          bgImg.style.transform = `translate(${savedLayout.bgPositionX || 0}px, ${savedLayout.bgPositionY || 0}px)`;
+        } else {
+          const existingBgImg = container.querySelector('.card-bg-img');
+          if (existingBgImg) {
+            existingBgImg.remove();
+          }
+        }
       }
     }
 
@@ -804,7 +1161,6 @@
       el.addEventListener('touchstart', dragStart, { passive: false });
 
       function dragStart(e) {
-        // បើកឱ្យ drag តែនៅពេលចុចលើធាតុផ្ទាល់
         const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
         const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
 
@@ -829,7 +1185,6 @@
         currentX = clientX - initialX;
         currentY = clientY - initialY;
 
-        // កំណត់ព្រំដែនកុំឱ្យអូសចេញក្រៅកាត (375px x 500px)
         const containerWidth = container.offsetWidth;
         const containerHeight = container.offsetHeight;
         const elWidth = el.offsetWidth;
@@ -856,19 +1211,17 @@
     // ៤. មុខងារ Selection លើធាតុនីមួយៗ
     function enableSelection(el, fieldId) {
       el.addEventListener('click', (e) => {
-        e.stopPropagation(); // ការពារកុំឱ្យប៉ះការចុចក្រៅកាត
+        e.stopPropagation();
 
         const isMultiSelect = chkMultiSelect.checked;
 
         if (!isMultiSelect) {
-          // សំអាត Selection មុនៗទាំងអស់
           document.querySelectorAll('.draggable-field').forEach(field => {
             field.classList.remove('field-selected');
           });
           selectedFieldIds = [fieldId];
           el.classList.add('field-selected');
         } else {
-          // របៀបជ្រើសរើសច្រើន
           const index = selectedFieldIds.indexOf(fieldId);
           if (index > -1) {
             selectedFieldIds.splice(index, 1);
@@ -893,11 +1246,9 @@
 
       lblSelectedInfo.textContent = selectedFieldIds.map(id => id.toUpperCase()).join(", ");
 
-      // ប្រសិនបើជ្រើសរើសតែមួយ ហើយជា Photo
       if (selectedFieldIds.length === 1 && selectedFieldIds[0] === 'photo') {
         propPhotoSizeContainer.classList.remove('hidden');
         
-        // ទាញយកទំហំ Photo បច្ចុប្បន្នមកបង្ហាញក្នុង Sliders
         const photoEl = document.getElementById('field-photo');
         if (photoEl) {
           const w = photoEl.offsetWidth;
@@ -911,10 +1262,8 @@
         propPhotoSizeContainer.classList.add('hidden');
       }
 
-      // ប្រសិនបើមានធាតុអក្សរយ៉ាងតិចមួយត្រូវបានជ្រើសរើស
       const hasTextSelected = selectedFieldIds.some(id => id !== 'photo');
       if (hasTextSelected) {
-        // បង្ហាញទំហំអក្សររបស់ធាតុទី១ ដែលបាន Select
         const firstTextId = selectedFieldIds.find(id => id !== 'photo');
         const fontSize = savedLayout[firstTextId].fontSize || 14;
         sliderFontSize.value = fontSize;
@@ -1008,7 +1357,6 @@
         return;
       }
 
-      // កំណត់ស្វែងរកធាតុដែលនៅលើគេបង្អស់ (Topmost Selected Field)
       let topmostEl = null;
       let minTop = Infinity;
 
@@ -1026,7 +1374,6 @@
       if (topmostEl) {
         const targetLeft = topmostEl.offsetLeft;
 
-        // អនុវត្តតម្រឹមឆ្វេងឱ្យស្មើនឹងធាតុនៅលើគេបង្អស់នោះ
         selectedFieldIds.forEach(id => {
           const el = document.getElementById(`field-${id}`);
           if (el) {
@@ -1046,7 +1393,6 @@
       sectionAdminLogin.classList.add('hidden');
       sectionAdminPanel.classList.add('hidden');
       
-      // នៅពេលត្រឡប់ទៅទំព័រដើមវិញ ត្រូវបិទផ្ទាំងលទ្ធផលចាស់ និងបង្ហាញផ្ទាំងស្វាគមន៍ឡើងវិញ
       publicCardResult.classList.add('hidden');
       document.getElementById('public-welcome-banner').classList.remove('hidden');
       publicSearchInput.value = '';
@@ -1062,7 +1408,6 @@
       }
     });
 
-    // ផ្ទៀងផ្ទាត់ដោយបញ្ចូល Username និង Password (SengVa / @9999)
     btnAdminLogin.addEventListener('click', () => {
       const usernameInput = adminUsernameInput.value.trim();
       const passwordInput = adminPasswordInput.value.trim();
@@ -1090,6 +1435,9 @@
         buildCardDOM(designerCardRender, true);
         displayCardData('designer-card-render', students[0] || initialStudents[0]);
         syncBgSlidersToUI();
+        if (inputLayoutAcademicYear) {
+          inputLayoutAcademicYear.value = savedLayout.academicYear || '2025-2026';
+        }
         designerContainerSection.scrollIntoView({ behavior: 'smooth' });
       }
     });
@@ -1103,13 +1451,12 @@
       sectionAdminPanel.classList.add('hidden');
       designerContainerSection.classList.add('hidden');
       adminAccountSection.classList.add('hidden');
+      watermarkSettingsSection.classList.add('hidden');
       sectionPublic.classList.remove('hidden');
       
-      // បង្ហាញផ្ទាំងស្វាគមន៍ទំព័រដើមឡើងវិញ
       document.getElementById('public-welcome-banner').classList.remove('hidden');
     });
 
-    // ប៊ូតុងបើក/បិទ ផ្ទាំងកំណត់គណនី Admin
     btnToggleAccountSettings.addEventListener('click', () => {
       adminAccountSection.classList.toggle('hidden');
       if (!adminAccountSection.classList.contains('hidden')) {
@@ -1122,7 +1469,82 @@
     btnCloseAccountSettings.addEventListener('click', () => adminAccountSection.classList.add('hidden'));
     btnCancelAccountChange.addEventListener('click', () => adminAccountSection.classList.add('hidden'));
 
-    // មុខងាររក្សាទុកព័ត៌មានគណនី Admin ថ្មី និងផ្ញើសារបញ្ជាក់ទៅ Gmail
+    function updateWatermarkSettingsPreview() {
+      lblWmSize.textContent = `${sliderWmSize.value}px`;
+      lblWmOpacity.textContent = `${sliderWmOpacity.value}%`;
+      lblWmAngle.textContent = `${sliderWmAngle.value}°`;
+      lblWmR.textContent = sliderWmR.value;
+      lblWmG.textContent = sliderWmG.value;
+      lblWmB.textContent = sliderWmB.value;
+      
+      const rgbStr = `rgb(${sliderWmR.value}, ${sliderWmG.value}, ${sliderWmB.value})`;
+      wmColorPreview.style.backgroundColor = rgbStr;
+      lblWmRgbPreview.textContent = rgbStr;
+    }
+
+    [inputWatermarkText, sliderWmSize, sliderWmOpacity, sliderWmAngle, sliderWmR, sliderWmG, sliderWmB].forEach(el => {
+      el.addEventListener('input', () => {
+        updateWatermarkSettingsPreview();
+        applyWatermarkPreview();
+      });
+    });
+
+    btnToggleWatermark.addEventListener('click', () => {
+      watermarkSettingsSection.classList.toggle('hidden');
+      if (!watermarkSettingsSection.classList.contains('hidden')) {
+        inputWatermarkText.value = localStorage.getItem('watermark_text') || '';
+        sliderWmSize.value = localStorage.getItem('watermark_size') || '28';
+        sliderWmOpacity.value = localStorage.getItem('watermark_opacity') || '20';
+        sliderWmAngle.value = localStorage.getItem('watermark_angle') || '-45';
+        sliderWmR.value = localStorage.getItem('watermark_color_r') || '107';
+        sliderWmG.value = localStorage.getItem('watermark_color_g') || '114';
+        sliderWmB.value = localStorage.getItem('watermark_color_b') || '128';
+        
+        updateWatermarkSettingsPreview();
+        applyWatermarkPreview();
+        watermarkSettingsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    btnCloseWatermark.addEventListener('click', () => {
+      watermarkSettingsSection.classList.add('hidden');
+      rollbackWatermarkPreview();
+    });
+    
+    btnCancelWatermark.addEventListener('click', () => {
+      watermarkSettingsSection.classList.add('hidden');
+      rollbackWatermarkPreview();
+    });
+
+    btnSaveWatermark.addEventListener('click', () => {
+      const text = inputWatermarkText.value.trim();
+
+      localStorage.setItem('watermark_text', text);
+      localStorage.setItem('watermark_size', sliderWmSize.value);
+      localStorage.setItem('watermark_opacity', sliderWmOpacity.value);
+      localStorage.setItem('watermark_angle', sliderWmAngle.value);
+      localStorage.setItem('watermark_color_r', sliderWmR.value);
+      localStorage.setItem('watermark_color_g', sliderWmG.value);
+      localStorage.setItem('watermark_color_b', sliderWmB.value);
+
+      alert('បានរក្សាទុកការកំណត់ Watermark ដោយជោគជ័យ!');
+      watermarkSettingsSection.classList.add('hidden');
+      
+      autoSyncToDrive();
+
+      if (!publicCardResult.classList.contains('hidden')) {
+        const query = publicSearchInput.value.trim().toLowerCase();
+        const student = students.find(s => 
+          s.id.toLowerCase() === query || 
+          s.name.toLowerCase().includes(query)
+        );
+        if (student) {
+          buildCardDOM(publicCardRender, false);
+          displayCardData('public-card-render', student);
+        }
+      }
+    });
+
     btnSaveAccountChange.addEventListener('click', () => {
       const newUser = document.getElementById('new-admin-user').value.trim();
       const newPass = document.getElementById('new-admin-pass').value.trim();
@@ -1138,13 +1560,11 @@
         return;
       }
 
-      // រក្សាទុកព័ត៌មានគណនីថ្មី
       adminUsername = newUser;
       adminPassword = newPass;
       localStorage.setItem('admin_username', newUser);
       localStorage.setItem('admin_password', newPass);
 
-      // បង្កើត Subject និង Body សម្រាប់សារបញ្ជាក់
       const subject = encodeURIComponent("ការបញ្ជាក់ពីការផ្លាស់ប្តូរគណនី Admin - ប្រព័ន្ធសាលារៀន");
       const body = encodeURIComponent(
         `គណនី Admin របស់អ្នកត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យដូចខាងក្រោម៖\n\n` +
@@ -1153,19 +1573,16 @@
         `សូមរក្សាព័ត៌មាននេះជាសម្ងាត់បំផុត!`
       );
 
-      // ប្រើប្រាស់ Gmail web compose link ដែលលឿន និងទាញទៅផ្ទាំងសរសេរសារក្នុង Gmail ផ្ទាល់
       const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${gmailAddr}&su=${subject}&body=${body}`;
 
-      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីរួចរាល់! ប្រព័ន្ធនឹងបើកផ្ទាំង Gmail ក្នុង Browser របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់គណនី Gmail របស់អ្នក។');
+      alert('បានផ្លាស់ប្តូរព័ត៌មានគណនីរួចរាល់! ប្រព័ន្ធនឹងបើកផ្ចាំ Gmail ក្នុង Browser របស់អ្នក ដើម្បីផ្ញើសារបញ្ជាក់ទៅកាន់គណនី Gmail របស់អ្នក។');
       
-      // បើក Gmail Compose Window
+      autoSyncToDrive();
+      
       window.open(gmailComposeUrl, '_blank');
-
-      // លាក់ផ្ទាំង
       adminAccountSection.classList.add('hidden');
     });
 
-    // ភ្លេចលេខសម្ងាត់ (Forgot Password)
     const btnForgotPassword = document.getElementById('btn-forgot-password');
     btnForgotPassword.addEventListener('click', () => {
       const currentRecoveryGmail = localStorage.getItem('confirm_admin_gmail');
@@ -1207,16 +1624,14 @@
         }
       });
 
-      // បំបែក bgImage ចេញពី savedLayout មុនពេលរក្សាទុកក្នុង LocalStorage ដើម្បីកុំឱ្យលើសចំណុះ (LocalStorage quota exceed)
       const layoutToSave = JSON.parse(JSON.stringify(savedLayout));
-      layoutToSave.bgImage = ""; // កុំរក្សាទុក Base64 ធំក្នុង LocalStorage
+      layoutToSave.bgImage = "";
 
       localStorage.setItem('card_layout', JSON.stringify(layoutToSave));
       
       alert('បានរក្សាទុកប្លង់កាតសិស្សរួចរាល់!');
-      
-      // បិទផ្ទាំង Layout Designer ដោយស្វ័យប្រវត្ត
       designerContainerSection.classList.add('hidden');
+      autoSyncToDrive();
     });
 
     btnResetLayout.addEventListener('click', async () => {
@@ -1224,13 +1639,16 @@
         savedLayout = JSON.parse(JSON.stringify(defaultLayout));
         localStorage.removeItem('card_layout');
         
-        // លុបរូបភាពផ្ទៃក្រោយចេញពី IndexedDB ផងដែរ
         await saveBgImageToDB("");
 
         buildCardDOM(designerCardRender, true);
         displayCardData('designer-card-render', students[0] || initialStudents[0]);
         syncBgSlidersToUI();
         layoutBgInput.value = '';
+        if (inputLayoutAcademicYear) {
+          inputLayoutAcademicYear.value = savedLayout.academicYear || '2025-2026';
+        }
+        autoSyncToDrive();
       }
     });
 
@@ -1240,7 +1658,6 @@
       if(e.key === 'Enter') performPublicSearch();
     });
 
-    // បន្ថែម Listener សម្រាប់ពេលលុបអក្សរចេញពីប្រអប់ស្វែងរក ឱ្យផ្ទាំងស្វាគមន៍ត្រឡប់មកវិញ
     publicSearchInput.addEventListener('input', (e) => {
       if (e.target.value.trim() === '') {
         publicCardResult.classList.add('hidden');
@@ -1255,7 +1672,6 @@
         return;
       }
 
-      // ត្រឡប់ទៅ Public Section ប្រសិនបើស្វែងរកពីទំព័រផ្សេង
       sectionPublic.classList.remove('hidden');
       sectionAdminLogin.classList.add('hidden');
       sectionAdminPanel.classList.add('hidden');
@@ -1267,19 +1683,16 @@
       );
 
       if (student) {
-        // លាក់ផ្ទាំងស្វាគមន៍នៅពេលស្វែងរកទិន្នន័យសិស្សបានជោគជ័យ
         document.getElementById('public-welcome-banner').classList.add('hidden');
 
         buildCardDOM(publicCardRender, false);
         displayCardData('public-card-render', student);
         
-        // បំពេញព័ត៌មានលម្អិតសិស្សផ្នែកខាងស្តាំ
         document.getElementById('detail-id').textContent = student.id;
         document.getElementById('detail-name').textContent = student.name;
         document.getElementById('detail-gender').textContent = student.gender;
         document.getElementById('detail-dob').textContent = student.dob;
         
-        // បំពេញព័ត៌មានទីកន្លែងកំណើតបំបែកជា ភូមិ ឃុំ ស្រុក ខេត្ត
         document.getElementById('detail-village').textContent = student.village || 'មិនមាន';
         document.getElementById('detail-commune').textContent = student.commune || 'មិនមាន';
         document.getElementById('detail-district').textContent = student.district || 'មិនមាន';
@@ -1295,11 +1708,11 @@
       } else {
         alert('មិនរកឃើញទិន្នន័យសិស្សដែលមានលេខ ឬឈ្មោះនេះទេ!');
         publicCardResult.classList.add('hidden');
-        // នៅតែបង្ហាញផ្ទាំងស្វាគមន៍ដដែលប្រសិនបើស្វែងរកមិនជោគជ័យ
         document.getElementById('public-welcome-banner').classList.remove('hidden');
       }
     }
 
+    // មុខងារកំណត់ទិន្នន័យលើកាត (លាក់ Placeholder ទាំងស្រុងពេលគ្មានរូបថត លើកលែងតែ Admin Designer)
     function displayCardData(containerId, student) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -1312,19 +1725,107 @@
       
       const photoEl = container.querySelector('#card-photo');
       const placeholderEl = container.querySelector('#card-photo-placeholder');
+      const photoField = container.querySelector('#field-photo');
 
       if (student.photo) {
         photoEl.src = student.photo;
         photoEl.classList.remove('hidden');
         placeholderEl.classList.add('hidden');
+        if (photoField) {
+          photoField.classList.remove('hidden');
+        }
       } else {
         photoEl.classList.add('hidden');
-        placeholderEl.classList.remove('hidden');
+        if (containerId === 'designer-card-render') {
+          // បង្ហាញ Placeholder តែក្នុង Designer របស់ Admin ប៉ុណ្ណោះ
+          placeholderEl.classList.remove('hidden');
+          if (photoField) {
+            photoField.classList.remove('hidden');
+          }
+        } else {
+          // លាក់ចោលទាំងស្រុងសម្រាប់ Public Search, PDF និង Modal ទាញយក
+          placeholderEl.classList.add('hidden');
+          if (photoField) {
+            photoField.classList.add('hidden');
+          }
+        }
       }
     }
 
-    // ១២. គ្រប់គ្រងបញ្ជីទិន្នន័យសិស្ស (បង្ហាញព័ត៌មានទាំងអស់ និងរូបថតខាងឆ្វេងបង្អស់)
+    function renderStudentReport() {
+      const total = students.length;
+      const totalFemale = students.filter(s => s.gender === 'ស្រី').length;
+      
+      const gradeCounts = {};
+      students.forEach(s => {
+        const grade = s.grade || 'មិនកំណត់';
+        if (!gradeCounts[grade]) {
+          gradeCounts[grade] = { total: 0, female: 0 };
+        }
+        gradeCounts[grade].total++;
+        if (s.gender === 'ស្រី') {
+          gradeCounts[grade].female++;
+        }
+      });
+
+      let gradeHtml = '';
+      const sortedGrades = Object.keys(gradeCounts).sort();
+      sortedGrades.forEach(grade => {
+        const count = gradeCounts[grade];
+        gradeHtml += `
+          <div class="bg-blue-50/50 border border-blue-100/50 rounded-lg p-3 text-center font-battambang transition hover:shadow-sm">
+            <div class="text-xs font-bold text-blue-800">ថ្នាក់ ${grade}</div>
+            <div class="text-base font-bold text-gray-900 mt-1">${count.total} នាក់</div>
+            <div class="text-xs text-pink-600 font-semibold mt-0.5">ស្រី: <span class="font-bold">${count.female}</span> នាក់</div>
+          </div>
+        `;
+      });
+
+      if (!gradeHtml) {
+        gradeHtml = '<div class="col-span-full text-xs text-gray-400 text-center py-4">មិនទាន់មានទិន្នន័យថ្នាក់ឡើយ</div>';
+      }
+
+      const reportContainer = document.getElementById('student-report-summary');
+      if (reportContainer) {
+        reportContainer.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold opacity-80 uppercase">ចំនួនសិស្សសរុប</p>
+                <h4 class="text-2xl font-bold mt-1">${total} នាក់</h4>
+              </div>
+              <div class="text-white opacity-30 text-3xl">
+                <i class="fa-solid fa-users"></i>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-pink-500 to-rose-600 text-white p-4 rounded-lg shadow-md flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold opacity-80 uppercase">ចំនួនសិស្សស្រីសរុប</p>
+                <h4 class="text-2xl font-bold mt-1">${totalFemale} នាក់</h4>
+              </div>
+              <div class="text-white opacity-30 text-3xl">
+                <i class="fa-solid fa-venus"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
+            <div class="text-xs font-semibold text-gray-500 uppercase border-b pb-2 mb-3 font-battambang flex items-center gap-1.5">
+              <i class="fa-solid fa-graduation-cap text-indigo-600"></i> ចំនួនសិស្សបំបែកតាមថ្នាក់រៀន
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              ${gradeHtml}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ១២. គ្រប់គ្រងបញ្ជីទិន្នន័យសិស្ស (ទទឹងតារាងស្មើទិន្នន័យ លុបការកម្រិតប្រវែងចាស់ចេញ)
     function renderAdminTable(filterQuery = '') {
+      renderStudentReport();
+
       studentTableBody.innerHTML = '';
       const filtered = students.filter(s => 
         s.id.toLowerCase().includes(filterQuery.toLowerCase()) || 
@@ -1341,7 +1842,6 @@
         const tr = document.createElement('tr');
         tr.className = 'border-b hover:bg-gray-50';
         
-        // បង្កើត Cell រូបថតសិស្ស
         let photoCell = `<div class="w-12 h-16 bg-gray-200 border border-gray-300 overflow-hidden flex items-center justify-center relative rounded mx-auto">`;
         if (student.photo) {
           photoCell += `<img src="${student.photo}" class="w-full h-full object-cover">`;
@@ -1352,18 +1852,18 @@
 
         tr.innerHTML = `
           <td class="px-2 py-3 text-center border border-gray-200">${photoCell}</td>
-          <td class="px-4 py-3 font-bold text-gray-900 border border-gray-200">${student.id}</td>
-          <td class="px-4 py-3 text-blue-700 font-semibold border border-gray-200">${student.name}</td>
-          <td class="px-4 py-3 border border-gray-200">${student.gender}</td>
-          <td class="px-4 py-3 font-semibold border border-gray-200">${student.grade}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200">${student.dob}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200">${student.village || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200">${student.commune || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200">${student.district || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200">${student.province || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200 max-w-[130px] truncate" title="${student.father || ''}">${student.father || '-'}</td>
-          <td class="px-4 py-3 text-xs border border-gray-200 max-w-[130px] truncate" title="${student.mother || ''}">${student.mother || '-'}</td>
-          <td class="px-4 py-3 border border-gray-200">${student.phone || '-'}</td>
+          <td class="px-4 py-3 font-bold text-gray-900 border border-gray-200 whitespace-nowrap">${student.id}</td>
+          <td class="px-4 py-3 text-blue-700 font-semibold border border-gray-200 whitespace-nowrap">${student.name}</td>
+          <td class="px-4 py-3 border border-gray-200 whitespace-nowrap">${student.gender}</td>
+          <td class="px-4 py-3 font-semibold border border-gray-200 whitespace-nowrap">${student.grade}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.dob}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.village || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.commune || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.district || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap">${student.province || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap" title="${student.father || ''}">${student.father || '-'}</td>
+          <td class="px-4 py-3 text-xs border border-gray-200 whitespace-nowrap" title="${student.mother || ''}">${student.mother || '-'}</td>
+          <td class="px-4 py-3 border border-gray-200 whitespace-nowrap">${student.phone || '-'}</td>
           <td class="px-4 py-3 text-center space-x-2 border border-gray-200 whitespace-nowrap">
             <button onclick="openCardDownloadModal('${student.id}')" class="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded">
               <i class="fa-solid fa-id-card"></i> មើល
@@ -1378,13 +1878,15 @@
         `;
         studentTableBody.appendChild(tr);
       });
+
+      // ធ្វើបច្ចុប្បន្នភាពទំហំ និងបង្ហាញរបារបញ្ជាអូសមើលទិន្នន័យ (Floating Scrollbar) ឡើងវិញ
+      setTimeout(updateStickyScrollbar, 50);
     }
 
     adminSearchInput.addEventListener('input', (e) => {
       renderAdminTable(e.target.value.trim());
     });
 
-    // មុខងារកែសម្រួលព័ត៌មានសិស្ស (Edit Mode)
     window.editStudent = function(id) {
       const student = students.find(s => s.id === id);
       if (!student) return;
@@ -1392,16 +1894,13 @@
       isEditMode = true;
       activeEditStudentId = id;
 
-      // បើកផ្ទាំងទម្រង់បញ្ចូលទិន្នន័យសិស្ស
       formManualStudent.classList.remove('hidden');
       formManualStudent.scrollIntoView({ behavior: 'smooth' });
 
-      // ផ្លាស់ប្តូរចំណងជើងទម្រង់
       document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-user-pen mr-2 text-blue-600"></i>កែសម្រួលព័ត៌មានសិស្ស (ID: ${id})`;
 
-      // ដាក់ទិន្នន័យចាស់ចូលប្រអប់បញ្ចូលនីមួយៗ
       document.getElementById('input-id').value = student.id;
-      document.getElementById('input-id').disabled = true; // បិទប្រអប់អត្តលេខដើម្បីការពារការកែប្រែជាន់គ្នា
+      document.getElementById('input-id').disabled = true;
       document.getElementById('input-name').value = student.name;
       document.getElementById('input-gender').value = student.gender;
       document.getElementById('input-dob').value = student.dob;
@@ -1414,7 +1913,6 @@
       document.getElementById('input-mother').value = student.mother || '';
       document.getElementById('input-phone').value = student.phone || '';
 
-      // រក្សាទុករូបថតចាស់ក្នុងករណីមិនដាក់រូបថ្មី
       activeEditStudentPhoto = student.photo || '';
     };
 
@@ -1433,11 +1931,10 @@
         students = students.filter(s => s.id !== id);
         localStorage.setItem('students', JSON.stringify(students));
         renderAdminTable(adminSearchInput.value);
-        autoSyncToDrive(); // Sync automatically
+        autoSyncToDrive();
       }
     }
 
-    // មុខងារលុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធ
     btnDeleteAllStudents.addEventListener('click', () => {
       if (students.length === 0) {
         alert('មិនមានទិន្នន័យសិស្សនៅក្នុងប្រព័ន្ធសម្រាប់លុបឡើយ!');
@@ -1451,13 +1948,14 @@
           localStorage.setItem('students', JSON.stringify(students));
           renderAdminTable();
           alert('បានលុបទិន្នន័យសិស្សទាំងអស់ចេញពីប្រព័ន្ធដោយជោគជ័យ!');
-          autoSyncToDrive(); // Sync automatically
+          autoSyncToDrive();
         } else {
           alert('ការលុបត្រូវបានបោះបង់ ដោយសារការវាយពាក្យបញ្ជាក់មិនត្រឹមត្រូវ!');
         }
       }
     });
 
+    // បើក Modal មើលកាតសិស្សច្បាប់ទាញយក (លុប Border ចេញ)
     window.openCardDownloadModal = function(id) {
       const student = students.find(s => s.id === id);
       if(!student) return;
@@ -1467,7 +1965,7 @@
       adminCardContainer.innerHTML = '';
       const cardDiv = document.createElement('div');
       cardDiv.id = "admin-card-render-modal";
-      cardDiv.className = "student-card-size bg-white border border-gray-400 relative overflow-hidden rounded";
+      cardDiv.className = "student-card-size bg-white relative overflow-hidden";
       
       adminCardContainer.appendChild(cardDiv);
       
@@ -1484,7 +1982,119 @@
       activeDownloadStudentId = null;
     }
 
-    // ១៣. ទាញយករូបភាពកាតសិស្សកម្រិតខ្ពស់ 1000 DPI
+    function populatePdfClassDropdown() {
+      selectPdfClass.innerHTML = '';
+      const grades = [...new Set(students.map(s => s.grade || 'មិនកំណត់'))].sort();
+      grades.forEach(grade => {
+        const opt = document.createElement('option');
+        opt.value = grade;
+        opt.textContent = `ថ្នាក់ ${grade}`;
+        selectPdfClass.appendChild(opt);
+      });
+    }
+
+    pdfScopeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'class') {
+          pdfClassSelectContainer.classList.remove('hidden');
+        } else {
+          pdfClassSelectContainer.classList.add('hidden');
+        }
+      });
+    });
+
+    btnOpenPdfModal.addEventListener('click', () => {
+      populatePdfClassDropdown();
+      document.getElementById('lbl-pdf-all-text').textContent = `ទាញយកកាតសិស្សទាំងអស់ (${students.length} នាក់)`;
+      document.querySelector('input[name="pdf-scope"][value="all"]').checked = true;
+      pdfClassSelectContainer.classList.add('hidden');
+      document.getElementById('pdf-progress-container').classList.add('hidden');
+      document.getElementById('bar-pdf-progress').style.width = '0%';
+      document.getElementById('lbl-pdf-progress-percent').textContent = '0%';
+      document.getElementById('lbl-pdf-progress-status').textContent = 'កំពុងរង់ចាំ...';
+      btnGeneratePdf.disabled = false;
+      
+      pdfDownloadModal.classList.remove('hidden');
+    });
+
+    btnClosePdfModal.addEventListener('click', () => pdfDownloadModal.classList.add('hidden'));
+    btnCancelPdf.addEventListener('click', () => pdfDownloadModal.classList.add('hidden'));
+
+    btnGeneratePdf.addEventListener('click', async () => {
+      btnGeneratePdf.disabled = true;
+      const scope = document.querySelector('input[name="pdf-scope"]:checked').value;
+      let targetStudents = [];
+
+      if (scope === 'all') {
+        targetStudents = [...students];
+      } else {
+        const selectedClass = selectPdfClass.value;
+        targetStudents = students.filter(s => (s.grade || 'មិនកំណត់') === selectedClass);
+      }
+
+      if (targetStudents.length === 0) {
+        alert('មិនមានសិស្សនៅក្នុងជម្រើសនេះទេ!');
+        btnGeneratePdf.disabled = false;
+        return;
+      }
+
+      const progressContainer = document.getElementById('pdf-progress-container');
+      const progressStatus = document.getElementById('lbl-pdf-progress-status');
+      const progressPercent = document.getElementById('lbl-pdf-progress-percent');
+      const progressBar = document.getElementById('bar-pdf-progress');
+
+      progressContainer.classList.remove('hidden');
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [75, 100]
+      });
+
+      const tempCard = document.getElementById('temp-pdf-card');
+
+      for (let i = 0; i < targetStudents.length; i++) {
+        const student = targetStudents[i];
+        const percent = Math.round((i / targetStudents.length) * 100);
+
+        progressStatus.textContent = `កំពុងគូររូបកាតសិស្ស៖ ${student.name} (${i + 1}/${targetStudents.length})`;
+        progressPercent.textContent = `${percent}%`;
+        progressBar.style.width = `${percent}%`;
+
+        buildCardDOM(tempCard, false);
+        displayCardData('temp-pdf-card', student);
+
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        const canvas = await html2canvas(tempCard, {
+          scale: 4,
+          useCORS: true,
+          allowTaint: true
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        if (i > 0) {
+          doc.addPage([75, 100], 'portrait');
+        }
+
+        doc.addImage(imgData, 'JPEG', 0, 0, 75, 100);
+      }
+
+      progressStatus.textContent = 'បានបញ្ចប់ការបង្កើត PDF!';
+      progressPercent.textContent = '100%';
+      progressBar.style.width = '100%';
+
+      const filename = scope === 'all' ? 'កាតសិស្សទាំងអស់.pdf' : `កាតសិស្ស_ថ្នាក់_${selectPdfClass.value}.pdf`;
+      doc.save(filename);
+
+      setTimeout(() => {
+        pdfDownloadModal.classList.add('hidden');
+        btnGeneratePdf.disabled = false;
+      }, 1000);
+    });
+
     btnDownloadCardImage.addEventListener('click', () => {
       const cardElement = document.getElementById('admin-card-render-modal');
       if(!cardElement) return;
@@ -1505,7 +2115,7 @@
       });
     });
 
-    // ១៤. មុខងារទាញយកទិន្នន័យសិស្សជា XLSX (Excel) រួមទាំងរូបថត និងកម្ពស់ជួរដេក 108
+    // ១៤. មុខងារទាញយកទិន្នន័យសិស្សជា XLSX (Excel)
     btnExportExcel.addEventListener('click', exportToExcel);
 
     async function exportToExcel() {
@@ -1517,7 +2127,6 @@
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('បញ្ជីឈ្មោះសិស្ស');
 
-      // បង្កើត Column Headers (បំបែក ភូមិ ឃុំ ស្រុក ខេត្ត)
       worksheet.columns = [
         { header: 'រូបថត', key: 'photo', width: 16 },
         { header: 'អត្តលេខ', key: 'id', width: 15 },
@@ -1534,21 +2143,18 @@
         { header: 'លេខទូរស័ព្ទអាណាព្យាបាល', key: 'phone', width: 24 }
       ];
 
-      // កំណត់ស្ទីល Row Header
       worksheet.getRow(1).height = 30;
       worksheet.getRow(1).font = { name: 'Kantumruy Pro', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
       worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
       
-      // បំពេញពណ៌ Background ឱ្យ Header Row
       worksheet.getRow(1).eachCell((cell) => {
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'FF1E40AF' } // Blue-800
+          fgColor: { argb: 'FF1E40AF' }
         };
       });
 
-      // បញ្ចូលទិន្នន័យសិស្សទៅតាម Row នីមួយៗ
       for (let i = 0; i < students.length; i++) {
         const student = students[i];
         const rowNumber = i + 2;
@@ -1568,16 +2174,14 @@
           phone: student.phone || ''
         });
 
-        // កំណត់កម្ពស់ជួរដេក 108 ឱ្យពេញស្អាត
         row.height = 108;
         row.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
-        // បញ្ចូលរូបថតសិស្សចូលទៅក្នុង Cell ជួរដំបូង (Column A)
         if (student.photo && student.photo.startsWith('data:image')) {
           try {
             const parts = student.photo.split(';base64,');
             if (parts.length === 2) {
-              const format = parts[0].split('image/')[1]; // ទម្រង់រូបភាព (png, jpeg, etc.)
+              const format = parts[0].split('image/')[1];
               const base64Data = parts[1];
               
               const imageId = workbook.addImage({
@@ -1585,10 +2189,9 @@
                 extension: format
               });
 
-              // បន្ថែមរូបចូល Cell និងតម្រឹមឱ្យត្រូវកណ្តាល Cell កម្ពស់ 108
               worksheet.addImage(imageId, {
                 tl: { col: 0.1, row: rowNumber - 1 + 0.05 },
-                ext: { width: 95, height: 126 }, // សមាមាត្រសមស្របនឹងកម្ពស់ 108
+                ext: { width: 95, height: 126 },
                 editAs: 'oneCell'
               });
             }
@@ -1598,7 +2201,6 @@
         }
       }
 
-      // កំណត់ស៊ុម (Borders) និងប្រភេទអក្សរ Kantumruy Pro ឱ្យរាល់កោសិកាទាំងអស់
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber > 1) {
           row.font = { name: 'Kantumruy Pro', size: 10 };
@@ -1613,7 +2215,22 @@
         });
       });
 
-      // ទាញយក File ចេញជាទម្រង់ .xlsx
+      worksheet.columns.forEach((column) => {
+        if (column.key !== 'photo') {
+          let maxLen = 0;
+          if (column.header) {
+            maxLen = Math.max(maxLen, column.header.toString().length);
+          }
+          column.eachCell({ includeEmpty: true }, (cell) => {
+            if (cell.value) {
+              const valueStr = cell.value.toString();
+              maxLen = Math.max(maxLen, valueStr.length);
+            }
+          });
+          column.width = Math.max(maxLen + 4, 12);
+        }
+      });
+
       try {
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1631,7 +2248,7 @@
 
     // ១៥. Manual & CSV Imports
     btnAddManual.addEventListener('click', () => {
-      resetStudentForm(); // Reset Form មុនបង្ហាញជានិច្ច
+      resetStudentForm();
       formManualStudent.classList.toggle('hidden');
     });
 
@@ -1648,7 +2265,6 @@
       const dob = document.getElementById('input-dob').value.trim();
       const grade = document.getElementById('input-grade').value.trim();
       
-      // ទាញយកព័ត៌មានទីកន្លែងកំណើតបំបែកជា ភូមិ ឃុំ ស្រុក ខេត្ត
       const village = document.getElementById('input-village').value.trim();
       const commune = document.getElementById('input-commune').value.trim();
       const district = document.getElementById('input-district').value.trim();
@@ -1664,7 +2280,6 @@
         return;
       }
 
-      // ប្រសិនបើកែសម្រួល ហើយមិនបានដាក់រូបថ្មីទេ ត្រូវប្រើរូបចាស់
       const studentData = { id, name, gender, dob, grade, village, commune, district, province, father, mother, phone, photo: isEditMode ? activeEditStudentPhoto : "" };
 
       if (photoFile) {
@@ -1681,14 +2296,12 @@
 
     function saveStudent(studentData) {
       if (isEditMode) {
-        // កែសម្រួលក្នុង Array
         const index = students.findIndex(s => s.id === activeEditStudentId);
         if (index > -1) {
           students[index] = studentData;
         }
         alert('បានកែសម្រួលព័ត៌មានសិស្សដោយជោគជ័យ!');
       } else {
-        // បន្ថែមថ្មី
         students.push(studentData);
         alert('បានរក្សាទុកទិន្នន័យសិស្សដោយជោគជ័យ!');
       }
@@ -1697,7 +2310,7 @@
       
       resetStudentForm();
       renderAdminTable(adminSearchInput.value);
-      autoSyncToDrive(); // Sync automatically
+      autoSyncToDrive();
     }
 
     const csvFileInput = document.getElementById('csv-file-input');
@@ -1721,7 +2334,6 @@
             const dob = row['ថ្ងៃខែឆ្នាំកំណើត'] || row['DOB'] || row['dob'];
             const grade = row['ថ្នាក់ទី'] || row['ថ្នាក់'] || row['Grade'] || row['grade'];
             
-            // គាំទ្រការអានទីកន្លែងកំណើតដែលបានបំបែករួច
             const village = row['ភូមិ'] || row['Village'] || row['village'] || "";
             const commune = row['ឃុំ_សង្កាត់'] || row['ឃុំ'] || row['Commune'] || row['commune'] || "";
             const district = row['ស្រុក_ខណ្ឌ'] || row['ស្រុក'] || row['District'] || row['district'] || "";
@@ -1759,7 +2371,7 @@
           renderAdminTable();
           alert(`នាំចូលជោគជ័យ៖ បានបញ្ចូលសិស្សថ្មីចំនួន ${importedCount} នាក់ (រំលងអត្តលេខស្ទួនចំនួន ${skipCount} នាក់)`);
           csvFileInput.value = '';
-          autoSyncToDrive(); // Sync automatically
+          autoSyncToDrive();
         },
         error: function(err) {
           alert('ការអានឯកសារ CSV មានកំហុស៖ ' + err.message);
@@ -1789,16 +2401,14 @@
     layoutBgInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        // បន្ថែមការត្រួតពិនិត្យទំហំកុំឱ្យលើស 15MB ការពារបញ្ហា IndexedDB
         if (file.size > 15 * 1024 * 1024) {
           alert("រូបភាពផ្ទៃក្រោយធំពេកហើយ! សូមជ្រើសរើសរូបភាពដែលមានទំហំតូចជាង 15MB។");
           return;
         }
         const reader = new FileReader();
         reader.onload = async function(event) {
-          savedLayout.bgImage = event.target.result; // Base64 កម្រិតច្បាស់ដើម
+          savedLayout.bgImage = event.target.result;
           
-          // រក្សាទុកកម្រិតច្បាស់អតិបរមា 1000dpi ទៅកាន់ IndexedDB ជៀសវាងបញ្ហា Quota LocalStorage
           await saveBgImageToDB(event.target.result);
 
           applyBgStyles(designerCardRender); 
@@ -1814,10 +2424,8 @@
     const btnSyncFromDrive = document.getElementById('btn-sync-from-drive');
     const syncStatus = document.getElementById('sync-status');
 
-    // កំណត់ URL លំនាំដើមរបស់ Google Apps Script
     const defaultDriveScriptUrl = "https://script.google.com/macros/s/AKfycby0hFv8FNS8nHouBcYnerLRHspQXtTXtYhD6ohM65_lAbEL3-gz3QjMqQ7Lq1Cnu-D1/exec";
 
-    // ផ្ទុកតំណភ្ជាប់ URL ពី LocalStorage ប្រសិនបើគ្មាន ប្រើប្រាស់ URL លំនាំដើម និងរក្សាទុកវាចូល LocalStorage ភ្លាមៗ
     let savedSyncUrl = localStorage.getItem('drive_script_url');
     if (!savedSyncUrl) {
       savedSyncUrl = defaultDriveScriptUrl;
@@ -1833,11 +2441,10 @@
       } else {
         localStorage.setItem('drive_script_url', url);
         alert('បានរក្សាទុក Web App URL ដោយជោគជ័យ!');
-        syncFromDrive(true); // ទាញយកទិន្នន័យស្វ័យប្រវត្តិតែម្តងពេលកំណត់រួច
+        syncFromDrive(true);
       }
     });
 
-    // សរសេរមុខងារសម្រាប់ខ្ចប់ទិន្នន័យទាំងអស់ (Students, Layout, IndexedDB Image, Admin login)
     async function getPayload() {
       const dbBg = await getBgImageFromDB();
       return {
@@ -1845,21 +2452,25 @@
         card_layout: savedLayout,
         bgImage: dbBg,
         admin_username: adminUsername,
-        admin_password: adminPassword
+        admin_password: adminPassword,
+        watermark_text: localStorage.getItem('watermark_text') || '',
+        watermark_size: localStorage.getItem('watermark_size') || '28',
+        watermark_opacity: localStorage.getItem('watermark_opacity') || '20',
+        watermark_angle: localStorage.getItem('watermark_angle') || '-45',
+        watermark_color_r: localStorage.getItem('watermark_color_r') || '107',
+        watermark_color_g: localStorage.getItem('watermark_color_g') || '114',
+        watermark_color_b: localStorage.getItem('watermark_color_b') || '128'
       };
     }
 
-    // សរសេរមុខងារដើម្បីយកទិន្នន័យពី Drive មកដំណើរការលើ Browser
     async function applyPayload(payload) {
       if (!payload) return;
       
-      // ធ្វើបច្ចុប្បន្នភាពទិន្នន័យសិស្ស
       if (payload.students) {
         students = payload.students;
         localStorage.setItem('students', JSON.stringify(students));
       }
       
-      // ធ្វើបច្ចុប្បន្នភាពគណនី Admin
       if (payload.admin_username && payload.admin_password) {
         adminUsername = payload.admin_username;
         adminPassword = payload.admin_password;
@@ -1867,24 +2478,41 @@
         localStorage.setItem('admin_password', adminPassword);
       }
 
-      // ធ្វើបច្ចុប្បន្នភាពទីតាំង Coordinates
       if (payload.card_layout) {
         savedLayout = payload.card_layout;
         const layoutToSave = JSON.parse(JSON.stringify(savedLayout));
-        layoutToSave.bgImage = ""; // កុំទុក Base64 ធំក្នុង LocalStorage
+        layoutToSave.bgImage = "";
         localStorage.setItem('card_layout', JSON.stringify(layoutToSave));
       }
 
-      // ធ្វើបច្ចុប្បន្នភាពរូបភាពក្នុង IndexedDB
       if (payload.bgImage !== undefined) {
         savedLayout.bgImage = payload.bgImage;
         await saveBgImageToDB(payload.bgImage);
       }
 
+      if (payload.watermark_text !== undefined) localStorage.setItem('watermark_text', payload.watermark_text);
+      if (payload.watermark_size !== undefined) localStorage.setItem('watermark_size', payload.watermark_size);
+      if (payload.watermark_opacity !== undefined) localStorage.setItem('watermark_opacity', payload.watermark_opacity);
+      if (payload.watermark_angle !== undefined) localStorage.setItem('watermark_angle', payload.watermark_angle);
+      if (payload.watermark_color_r !== undefined) localStorage.setItem('watermark_color_r', payload.watermark_color_r);
+      if (payload.watermark_color_g !== undefined) localStorage.setItem('watermark_color_g', payload.watermark_color_g);
+      if (payload.watermark_color_b !== undefined) localStorage.setItem('watermark_color_b', payload.watermark_color_b);
+
       renderAdminTable();
+
+      if (!publicCardResult.classList.contains('hidden')) {
+        const query = publicSearchInput.value.trim().toLowerCase();
+        const student = students.find(s => 
+          s.id.toLowerCase() === query || 
+          s.name.toLowerCase().includes(query)
+        );
+        if (student) {
+          buildCardDOM(publicCardRender, false);
+          displayCardData('public-card-render', student);
+        }
+      }
     }
 
-    // មុខងារផ្ញើទៅ Drive
     async function syncToDrive(silent = false) {
       const url = localStorage.getItem('drive_script_url');
       if (!url) {
@@ -1892,7 +2520,7 @@
         return;
       }
 
-      syncStatus.textContent = "កំពុងរក្សាទុកទៅ Drive...";
+      if (!silent) syncStatus.textContent = "កំពុងរក្សាទុកទៅ Drive...";
 
       try {
         const payload = await getPayload();
@@ -1900,24 +2528,26 @@
           method: 'POST',
           body: JSON.stringify(payload),
           headers: {
-            'Content-Type': 'text/plain' // Bypass CORS Preflight
+            'Content-Type': 'text/plain'
           }
         });
         const result = await response.json();
         if (result.status === "success") {
-          syncStatus.textContent = "រក្សាទុកទៅ Drive ជោគជ័យ!";
-          if (!silent) alert('បានរក្សាទុកទិន្នន័យទាំងអស់ទៅកាន់ Google Drive របស់អ្នកដោយជោគជ័យ!');
+          if (!silent) {
+            syncStatus.textContent = "រក្សាទុកទៅ Drive ជោគជ័យ!";
+            alert('បានរក្សាទុកទិន្នន័យទាំងអស់ទៅកាន់ Google Drive របស់អ្នកដោយជោគជ័យ!');
+          }
         } else {
           throw new Error(result.message);
         }
       } catch (err) {
-        syncStatus.textContent = "រក្សាទុកបរាជ័យ!";
-        console.error(err);
-        if (!silent) alert('ការរក្សាទុកបរាជ័យ៖ ' + err.toString());
+        if (!silent) {
+          syncStatus.textContent = "រក្សាទុកបរាជ័យ!";
+          alert('ការរក្សាទុកបរាជ័យ៖ ' + err.toString());
+        }
       }
     }
 
-    // មុខងារទាញយកពី Drive
     async function syncFromDrive(silent = false) {
       const url = localStorage.getItem('drive_script_url');
       if (!url) {
@@ -1925,27 +2555,35 @@
         return;
       }
 
-      syncStatus.textContent = "កំពុងទាញយកពី Drive...";
+      if (!silent) syncStatus.textContent = "កំពុងទាញយកពី Drive...";
 
       try {
         const response = await fetch(url);
         const result = await response.json();
         if (result.status === "success" && result.data) {
-          await applyPayload(result.data);
-          syncStatus.textContent = "ទាញយកពី Drive ជោគជ័យ!";
-          if (!silent) alert('បានទាញយកទិន្នន័យចុងក្រោយពី Google Drive របស់អ្នកដោយជោគជ័យ!');
+          const currentPayloadStr = JSON.stringify(await getPayload());
+          const receivedPayloadStr = JSON.stringify(result.data);
+          
+          if (currentPayloadStr !== receivedPayloadStr) {
+            await applyPayload(result.data);
+            if (!silent) syncStatus.textContent = "ទាញយកពី Drive ជោគជ័យ!";
+          } else {
+            if (!silent) syncStatus.textContent = "ទិន្នន័យទាន់សម័យរួចរាល់";
+          }
         } else {
-          syncStatus.textContent = "គ្មានទិន្នន័យលើ Drive";
-          if (!silent) alert('គ្មានទិន្នន័យចាស់ដែលត្រូវបានរក្សាទុកនៅលើ Drive ឡើយ!');
+          if (!silent) {
+            syncStatus.textContent = "គ្មានទិន្នន័យលើ Drive";
+            alert('គ្មានទិន្នន័យចាស់ដែលត្រូវបានរក្សាទុកនៅលើ Drive ឡើយ!');
+          }
         }
       } catch (err) {
-        syncStatus.textContent = "ទាញយកបរាជ័យ!";
-        console.error(err);
-        if (!silent) alert('ការទាញយកបរាជ័យ៖ ' + err.toString());
+        if (!silent) {
+          syncStatus.textContent = "ទាញយកបរាជ័យ!";
+          alert('ការទាញយកបរាជ័យ៖ ' + err.toString());
+        }
       }
     }
 
-    // ដំណើរការរក្សាទុកស្វ័យប្រវត្តពេលមានការប្រែប្រួលទិន្នន័យ (Auto Sync)
     function autoSyncToDrive() {
       const url = localStorage.getItem('drive_script_url');
       if (url) {
@@ -1953,17 +2591,87 @@
       }
     }
 
+    let driveSyncTimer = null;
+    function startDrivePolling() {
+      if (driveSyncTimer) clearInterval(driveSyncTimer);
+      driveSyncTimer = setInterval(() => {
+        const url = localStorage.getItem('drive_script_url');
+        if (url && document.visibilityState === 'visible') {
+          syncFromDrive(true); 
+        }
+      }, 5000);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncFromDrive(true);
+      }
+    });
+
     btnSyncToDrive.addEventListener('click', () => syncToDrive(false));
     btnSyncFromDrive.addEventListener('click', () => syncFromDrive(false));
 
-    // កំណត់ទិន្នន័យដំបូងពេលបើកទំព័រ
+    // --- Floating Scrollbar Sync logic ---
+    const tableScrollWrapper = document.getElementById('table-scroll-wrapper');
+    const stickyScrollWrapper = document.getElementById('sticky-scroll-wrapper');
+    const stickyScrollContent = document.getElementById('sticky-scroll-content');
+
+    function setupStickyScrollbar() {
+      if (!tableScrollWrapper || !stickyScrollWrapper) return;
+
+      let isSyncingTable = false;
+      let isSyncingSticky = false;
+
+      tableScrollWrapper.addEventListener('scroll', () => {
+        if (!isSyncingTable) {
+          isSyncingSticky = true;
+          stickyScrollWrapper.scrollLeft = tableScrollWrapper.scrollLeft;
+        }
+        isSyncingTable = false;
+      });
+
+      stickyScrollWrapper.addEventListener('scroll', () => {
+        if (!isSyncingSticky) {
+          isSyncingTable = true;
+          tableScrollWrapper.scrollLeft = stickyScrollWrapper.scrollLeft;
+        }
+        isSyncingSticky = false;
+      });
+    }
+
+    function updateStickyScrollbar() {
+      if (!tableScrollWrapper || !stickyScrollWrapper || !stickyScrollContent) return;
+      if (tableScrollWrapper.scrollWidth > tableScrollWrapper.clientWidth) {
+        stickyScrollWrapper.style.display = 'block';
+        stickyScrollContent.style.width = `${tableScrollWrapper.scrollWidth}px`;
+        stickyScrollWrapper.scrollLeft = tableScrollWrapper.scrollLeft;
+      } else {
+        stickyScrollWrapper.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('resize', updateStickyScrollbar);
+
+    // --- Event Listener សម្រាប់ ប្ដូរឆ្នាំសិក្សាក្នុងប្លង់កាត ---
+    const inputLayoutAcademicYear = document.getElementById('input-layout-academic-year');
+    if (inputLayoutAcademicYear) {
+      inputLayoutAcademicYear.value = savedLayout.academicYear || '2025-2026';
+      inputLayoutAcademicYear.addEventListener('input', (e) => {
+        savedLayout.academicYear = e.target.value.trim() || '2025-2026';
+        const yrSpan = designerCardRender.querySelector('#card-year');
+        if (yrSpan) {
+          yrSpan.textContent = savedLayout.academicYear;
+        }
+      });
+    }
+
     async function initPage() {
+      setupStickyScrollbar();
       const url = localStorage.getItem('drive_script_url');
       if (url) {
-        // ប្រសិនបើធ្លាប់ភ្ជាប់ URL, ទាញយកទិន្នន័យចុងក្រោយពី Drive មកភ្លាម
         await syncFromDrive(true);
+        startDrivePolling();
       } else {
-        // ប្រសិនបើគ្មាន URL, ផ្ទុករូបភាពចាស់ពី IndexedDB មកដំណើរការធម្មតា
         try {
           const dbBg = await getBgImageFromDB();
           savedLayout.bgImage = dbBg || defaultLayout.bgImage;
@@ -1972,9 +2680,9 @@
         }
         renderAdminTable();
       }
+      updateStickyScrollbar();
     }
 
-    // ហៅដំណើរការកូដផ្ដើម
     initPage();
   </script>
 </body>
